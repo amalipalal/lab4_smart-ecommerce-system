@@ -41,3 +41,6 @@ build/
 
 ### Maven ###
 .mvn/
+
+### Project ###
+.env
