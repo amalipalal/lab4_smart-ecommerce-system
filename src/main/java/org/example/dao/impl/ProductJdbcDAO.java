@@ -100,7 +100,8 @@ public class ProductJdbcDAO implements ProductDAO {
         }
     }
 
-    private List<Product> queryList(String query, StatementPreparer preparer) throws SQLException, DatabaseConnectionException {
+    private List<Product> queryList(String query, StatementPreparer preparer) throws SQLException,
+            DatabaseConnectionException {
         List<Product> results = new ArrayList<>();
 
         try(Connection conn = DBConnection.getConnection()) {
