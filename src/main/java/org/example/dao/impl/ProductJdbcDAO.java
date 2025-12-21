@@ -1,6 +1,7 @@
 package org.example.dao.impl;
 
 import org.example.dao.ProductDAO;
+import org.example.dao.StatementPreparer;
 import org.example.dao.exception.DAOException;
 import org.example.model.Product;
 import org.example.util.DBConnection;
@@ -195,10 +196,5 @@ public class ProductJdbcDAO implements ProductDAO {
         } catch (DatabaseConnectionException | SQLException e) {
             throw new RuntimeException("Error deleting product", e);
         }
-    }
-
-    @FunctionalInterface
-    private interface StatementPreparer {
-        void prepare(PreparedStatement ps) throws SQLException;
     }
 }

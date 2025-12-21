@@ -1,6 +1,7 @@
 package org.example.dao.impl;
 
 import org.example.dao.OrdersDAO;
+import org.example.dao.StatementPreparer;
 import org.example.dao.exception.DAOException;
 import org.example.model.Orders;
 import org.example.util.DBConnection;
@@ -110,10 +111,5 @@ public class OrderJdbcDAO implements OrdersDAO {
             preparer.prepare(ps);
             ps.executeUpdate();
         }
-    }
-
-    @FunctionalInterface
-    private interface StatementPreparer {
-        void prepare(PreparedStatement ps) throws SQLException;
     }
 }

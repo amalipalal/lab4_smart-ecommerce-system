@@ -1,6 +1,7 @@
 package org.example.dao.impl;
 
 import org.example.dao.CategoryDAO;
+import org.example.dao.StatementPreparer;
 import org.example.dao.exception.DAOException;
 import org.example.model.Category;
 import org.example.util.DBConnection;
@@ -144,10 +145,5 @@ public class CategoryJdbcDAO implements CategoryDAO {
         } catch (SQLException | DatabaseConnectionException e) {
             throw new DAOException("Failed to update " + category.getName() + "category.", e);
         }
-    }
-
-    @FunctionalInterface
-    private interface StatementPreparer {
-        void prepare(PreparedStatement ps) throws SQLException;
     }
 }
