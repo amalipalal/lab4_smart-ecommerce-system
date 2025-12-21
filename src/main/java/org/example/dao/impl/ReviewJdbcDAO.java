@@ -1,6 +1,7 @@
 package org.example.dao.impl;
 
 import org.example.dao.ReviewDAO;
+import org.example.dao.StatementPreparer;
 import org.example.dao.exception.DAOException;
 import org.example.model.Review;
 import org.example.util.DBConnection;
@@ -102,10 +103,5 @@ public class ReviewJdbcDAO implements ReviewDAO {
             preparer.prepare(ps);
             ps.executeUpdate();
         }
-    }
-
-    @FunctionalInterface
-    private interface StatementPreparer {
-        void prepare(PreparedStatement ps) throws SQLException;
     }
 }
