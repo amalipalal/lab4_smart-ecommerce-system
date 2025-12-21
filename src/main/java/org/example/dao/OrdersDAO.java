@@ -1,5 +1,6 @@
 package org.example.dao;
 
+import org.example.dao.exception.DAOException;
 import org.example.model.Orders;
 
 import java.util.List;
@@ -8,9 +9,9 @@ import java.util.UUID;
 
 public interface OrdersDAO {
 
-    Optional<Orders> findById(UUID orderId);
+    Optional<Orders> findById(UUID orderId) throws DAOException;
 
-    List<Orders> findByCustomer(UUID customerId, int limit, int offset);
+    List<Orders> findByCustomer(UUID customerId, int limit, int offset) throws DAOException;
 
-    void save(Orders order);
+    void save(Orders order) throws DAOException;
 }
