@@ -127,6 +127,8 @@ public class CategoryJdbcDAO implements CategoryDAO {
             PreparedStatement ps = conn.prepareStatement(query);
 
             if(preparer != null) preparer.prepare(ps);
+
+            ps.executeUpdate();
         }
     }
 
@@ -137,6 +139,7 @@ public class CategoryJdbcDAO implements CategoryDAO {
                 ps.setString(1, category.getName());
                 ps.setString(2, category.getDescription());
                 ps.setTimestamp(3, Timestamp.from(category.getUpdatedAt()));
+                ps.setObject(4, category.getCategoryId());
             });
         } catch (SQLException | DatabaseConnectionException e) {
             throw new DAOException("Failed to update " + category.getName() + "category.", e);
