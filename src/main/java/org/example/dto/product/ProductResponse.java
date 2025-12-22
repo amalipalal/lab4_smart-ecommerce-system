@@ -1,5 +1,7 @@
 package org.example.dto.product;
 
+import org.example.model.Product;
+
 import java.util.UUID;
 
 public record ProductResponse(
@@ -8,4 +10,10 @@ public record ProductResponse(
         String description,
         double price,
         int stock
-) {}
+) {
+
+    public ProductResponse(Product product) {
+        this(product.getProductId(), product.getName(), product.getDescription(),
+                product.getPrice(), product.getStockQuantity());
+    }
+}
