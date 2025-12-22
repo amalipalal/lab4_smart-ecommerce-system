@@ -51,4 +51,16 @@ public class CategoryService {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
+
+    public CreateCategoryResponse getCategory(String name) {
+        try {
+            var category = this.categoryDAO.findByName(name)
+                    .orElseThrow(() ->
+                            new CategoryNotFoundException(name));
+
+            return new CreateCategoryResponse(category.getCategoryId(), category.getName(), category.getDescription());
+        } catch (DAOException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
 }
