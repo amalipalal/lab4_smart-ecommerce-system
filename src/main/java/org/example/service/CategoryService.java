@@ -39,4 +39,16 @@ public class CategoryService {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
+
+    public CreateCategoryResponse getCategory(UUID categoryId) {
+        try {
+            var category = this.categoryDAO.findById(categoryId)
+                    .orElseThrow(() ->
+                            new CategoryNotFoundException(categoryId.toString()));
+
+            return new CreateCategoryResponse(category.getCategoryId(), category.getName(), category.getDescription());
+        } catch (DAOException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
 }
