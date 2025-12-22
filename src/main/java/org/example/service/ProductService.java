@@ -46,13 +46,8 @@ public class ProductService {
         try {
             var product = this.productDAO.findById(productId)
                     .orElseThrow(() -> new ProductNotFoundException(productId.toString()));
-            return new ProductResponse(
-                    product.getProductId(),
-                    product.getName(),
-                    product.getDescription(),
-                    product.getPrice(),
-                    product.getStockQuantity()
-            );
+
+            return new ProductResponse(product);
         } catch (DAOException e) {
             throw new RuntimeException(e);
         }
