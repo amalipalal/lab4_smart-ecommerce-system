@@ -3,6 +3,7 @@ package org.example.dao.impl;
 import org.example.dao.ProductDAO;
 import org.example.dao.StatementPreparer;
 import org.example.dao.exception.DAOException;
+import org.example.dao.exception.InsufficientStockException;
 import org.example.model.Product;
 import org.example.util.DBConnection;
 import org.example.util.exception.DatabaseConnectionException;
@@ -51,6 +52,18 @@ public class ProductJdbcDAO implements ProductDAO {
             SET name = ?, description = ?, price = ?, stock_quantity = ?,
                 category_id = ?, updated_at = ?
             WHERE product_id = ?
+            """;
+
+    private static final String REDUCE_STOCK = """
+            UPDATE product
+            SET stock_quantity = stock_quantity - ?
+            WHERE product_id = ? AND stock_quantity >= ?
+            """;
+
+    private static final String INCREASE_STOCK = """
+            UPDATE product
+            SET stock_quantity = stock_quantity + ?
+            WHERE product_id = ? AND stock_quantity >= ?
             """;
 
     private static final String DELETE = """
@@ -164,6 +177,40 @@ public class ProductJdbcDAO implements ProductDAO {
             ps.executeUpdate();
         } catch (DatabaseConnectionException | SQLException e) {
             throw new DAOException("Error saving product", e);
+        }
+    }
+
+    @Override
+    public void reduceStock(UUID productId, int quantity) throws DAOException {
+        try(Connection conn = DBConnection.getConnection()){
+            PreparedStatement preparedStatement = conn.prepareStatement(REDUCE_STOCK);
+            preparedStatement.setInt(1, quantity);
+            preparedStatement.setObject(2, productId);
+            preparedStatement.setInt(3, quantity);
+
+            int updateRows = preparedStatement.executeUpdate();
+            if(updateRows == 0)
+                throw new InsufficientStockException(productId.toString());
+
+        } catch (SQLException | DatabaseConnectionException e) {
+            throw new DAOException("Failed to update stock for product" + productId, e);
+        }
+    }
+
+    @Override
+    public void increaseStock(UUID productId, int quantity) throws DAOException {
+        try(Connection conn = DBConnection.getConnection()){
+            PreparedStatement preparedStatement = conn.prepareStatement(INCREASE_STOCK);
+            preparedStatement.setInt(1, quantity);
+            preparedStatement.setObject(2, productId);
+            preparedStatement.setInt(3, quantity);
+
+            int updateRows = preparedStatement.executeUpdate();
+            if(updateRows == 0)
+                throw new InsufficientStockException(productId.toString());
+
+        } catch (SQLException | DatabaseConnectionException e) {
+            throw new DAOException("Failed to increase stock for product" + productId, e);
         }
     }
 
