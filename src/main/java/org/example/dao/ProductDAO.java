@@ -21,5 +21,9 @@ public interface ProductDAO {
 
     void update(Product product) throws DAOException;
 
+    void reduceStock(UUID productId, int quantity) throws DAOException;
+
+    void increaseStock(UUID productId, int quantity) throws DAOException;
+
     void deleteById(UUID productId) throws DAOException;
 }
