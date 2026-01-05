@@ -63,4 +63,13 @@ public class CategoryService {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
+
+    public List<CreateCategoryResponse> getAllCategories(int limit, int offset) {
+        try {
+            List<Category> allCategories = categoryDAO.findAll(limit, offset);
+            return allCategories.stream().map(CreateCategoryResponse::new).toList();
+        } catch (DAOException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
 }
