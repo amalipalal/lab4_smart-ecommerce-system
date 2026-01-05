@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<BorderPane xmlns="http://javafx.com/javafx/21.0.2"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.controller.category.AdminCategoryController"
+            stylesheets="@/css/base-category.css">
+
+    <!-- Sidebar -->
+    <left>
+        <VBox spacing="20" styleClass="sidebar">
+            <Label text="Admin" styleClass="sidebar-title"/>
+
+            <Button styleClass="sidebar-btn">
+                <graphic>
+                    <FontIcon iconLiteral="fas-box" iconSize="16"/>
+                </graphic>
+                Products
+            </Button>
+
+            <Button styleClass="sidebar-btn active">
+                <graphic>
+                    <FontIcon iconLiteral="fas-tags" iconSize="16"/>
+                </graphic>
+                Categories
+            </Button>
+
+            <Button styleClass="sidebar-btn">
+                <graphic>
+                    <FontIcon iconLiteral="fas-shopping-cart" iconSize="16"/>
+                </graphic>
+                Orders
+            </Button>
+
+            <Button styleClass="sidebar-btn">
+                <graphic>
+                    <FontIcon iconLiteral="fas-users" iconSize="16"/>
+                </graphic>
+                Customers
+            </Button>
+        </VBox>
+    </left>
+
+    <!-- Main Content -->
+    <center>
+        <VBox spacing="20" styleClass="content">
+
+            <!-- Add category btn -->
+            <HBox alignment="CENTER_RIGHT">
+                <Button fx:id="addCategoryBtn"
+                        onAction="#handleAddCategory"
+                        styleClass="fab-btn">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-plus" iconSize="12"/>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Add Category"/>
+                    </tooltip>
+                    Add Category
+                </Button>
+            </HBox>
+
+            <!-- Card With Table -->
+            <VBox styleClass="card">
+                <Label text="Categories" styleClass="card-title"/>
+
+                <TableView fx:id="categoryTable" styleClass="modern-table">
+                    <columns>
+                        <TableColumn text="ID" fx:id="idColumn"/>
+                        <TableColumn text="Name" fx:id="nameColumn"/>
+                        <TableColumn text="Description" fx:id="descColumn"/>
+                        <TableColumn text="Created" fx:id="createdAtColumn"/>
+                        <TableColumn text="Actions" fx:id="actionsColumn"/>
+                    </columns>
+                </TableView>
+            </VBox>
+
+        </VBox>
+    </center>
+
+</BorderPane>
