@@ -9,6 +9,7 @@ import org.example.service.exception.CategoryNotFoundException;
 import org.example.service.exception.DuplicateCategoryException;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 public class CategoryService {
@@ -34,7 +35,7 @@ public class CategoryService {
             this.categoryDAO.save(category);
 
             return new CreateCategoryResponse(
-                    category.getCategoryId(), category.getName(), category.getDescription());
+                    category.getCategoryId(), category.getName(), category.getDescription(), category.getCreatedAt());
         } catch (DAOException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -46,7 +47,8 @@ public class CategoryService {
                     .orElseThrow(() ->
                             new CategoryNotFoundException(categoryId.toString()));
 
-            return new CreateCategoryResponse(category.getCategoryId(), category.getName(), category.getDescription());
+            return new CreateCategoryResponse(
+                    category.getCategoryId(), category.getName(), category.getDescription(), category.getCreatedAt());
         } catch (DAOException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -58,7 +60,8 @@ public class CategoryService {
                     .orElseThrow(() ->
                             new CategoryNotFoundException(name));
 
-            return new CreateCategoryResponse(category.getCategoryId(), category.getName(), category.getDescription());
+            return new CreateCategoryResponse(
+                    category.getCategoryId(), category.getName(), category.getDescription(), category.getCreatedAt());
         } catch (DAOException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
