@@ -27,8 +27,8 @@ public class CategoryJdbcDAO implements CategoryDAO {
 
     private static final String FIND_ALL = """
             SELECT * FROM category
-            LIMIT ? OFFSET ?
             ORDER BY name ASC
+            LIMIT ? OFFSET ?
             """;
 
     private static final String SAVE = """
@@ -102,7 +102,7 @@ public class CategoryJdbcDAO implements CategoryDAO {
                 }
             }
         } catch (SQLException | DatabaseConnectionException e) {
-            throw new DAOException("Failed to fetch all categories", e);
+            throw new DAOException("Failed to fetch all categories" + e.getMessage(), e);
         }
         return categories;
     }
