@@ -9,10 +9,13 @@ import javafx.stage.Stage;
 public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/fxml/test-view.fxml")
-        );
+        ApplicationContext  context = ApplicationContext.getInstance();
+        ApplicationControllerFactory factory = new ApplicationControllerFactory(context);
 
+        FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/fxml/base-category.fxml")
+        );
+        loader.setControllerFactory(factory);
         Parent root = loader.load();
 
         stage.setTitle("E-commerce App");
