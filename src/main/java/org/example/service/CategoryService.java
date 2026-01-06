@@ -2,8 +2,10 @@ package org.example.service;
 
 import org.example.dao.CategoryDAO;
 import org.example.dao.exception.DAOException;
+import org.example.dto.category.CategoryResponse;
 import org.example.dto.category.CreateCategoryRequest;
 import org.example.dto.category.CreateCategoryResponse;
+import org.example.dto.category.UpdateCategoryRequest;
 import org.example.model.Category;
 import org.example.service.exception.CategoryNotFoundException;
 import org.example.service.exception.DuplicateCategoryException;
@@ -36,6 +38,30 @@ public class CategoryService {
 
             return new CreateCategoryResponse(
                     category.getCategoryId(), category.getName(), category.getDescription(), category.getCreatedAt());
+        } catch (DAOException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    public CategoryResponse updateCategory(UpdateCategoryRequest request) {
+        try {
+            var categoryToUpdate = this.categoryDAO.findById(request.categoryId())
+                    .orElseThrow(() -> new CategoryNotFoundException(request.categoryId().toString()));
+
+            if(this.categoryDAO.findByName(request.name()).isPresent())
+                throw new DuplicateCategoryException(request.name());
+
+            var updatedCategory = new Category(
+                    categoryToUpdate.getCategoryId(),
+                    request.name(),
+                    request.description(),
+                    categoryToUpdate.getCreatedAt(),
+                    Instant.now()
+            );
+
+            this.categoryDAO.update(updatedCategory);
+            return new CategoryResponse(updatedCategory);
+
         } catch (DAOException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
