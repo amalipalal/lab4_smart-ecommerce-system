@@ -73,7 +73,8 @@ public class AdminCategoryController {
                 updateBtn.setOnAction(e -> {
                     CreateCategoryResponse category =
                             getTableView().getItems().get(getIndex());
-                    // TODO: open update modal
+
+                    handleUpdateCategory(category);
                 });
 
                 deleteBtn.setOnAction(e -> {
@@ -92,20 +93,34 @@ public class AdminCategoryController {
     }
 
     public void handleAddCategory() {
+        openCategoryModal("Add Category", null);
+    }
+
+    private void openCategoryModal(String title, CreateCategoryResponse category) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/category-modal.fxml"));
-            loader.setControllerFactory(cls -> new CategoryModalController(categoryService));
+            CategoryModalController controller = new CategoryModalController(categoryService);
+
+            loader.setController(controller);
+
             Stage modal = new Stage();
-            modal.setTitle("Add Category");
+            modal.setTitle(title);
             modal.setScene(new Scene(loader.load()));
             modal.initModality(Modality.APPLICATION_MODAL);
-            modal.showAndWait();
 
+            if(category != null)
+                controller.setCategory(category);
+
+            modal.showAndWait();
             loadCategories(20, 0);
         } catch (Exception e) {
             e.printStackTrace();
-            showError("Failed to add category", "Could not add this category.\nTry again later.");
+            showError("Failed to open modal", e.getMessage());
         }
+    }
+
+    public void handleUpdateCategory(CreateCategoryResponse category) {
+       openCategoryModal("Update category", category);
     }
 
     private void loadCategories(int limit, int offset) {
