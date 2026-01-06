@@ -5,6 +5,8 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.example.dto.category.CreateCategoryRequest;
+import org.example.dto.category.CreateCategoryResponse;
+import org.example.dto.category.UpdateCategoryRequest;
 import org.example.service.CategoryService;
 
 public class CategoryModalController {
@@ -13,27 +15,51 @@ public class CategoryModalController {
     public Button saveBtn;
 
     private final CategoryService categoryService;
+    private CreateCategoryResponse categoryToUpdate;
 
     public CategoryModalController(CategoryService categoryService) {
         this.categoryService = categoryService;
+    }
+
+    public void setCategory(CreateCategoryResponse category) {
+        this.categoryToUpdate = category;
+
+        nameField.setText(category.name());
+        descField.setText(category.description());
+        saveBtn.setText("Update Category");
     }
 
     public void handleSave() {
         try {
             String name = nameField.getText();
             String desc = descField.getText();
+            if(name.isBlank()) {
+                showError("Validation Error", "Category name is required");
+                return;
+            }
 
-            if(name.isBlank()) return;
+            if(categoryToUpdate == null) {
+                CreateCategoryRequest category = new CreateCategoryRequest(name, desc);
+                categoryService.createCategory(category);
+            } else {
+                UpdateCategoryRequest request = new UpdateCategoryRequest(
+                        categoryToUpdate.categoryId(),
+                        name,
+                        desc
+                );
+                categoryService.updateCategory(request);
+            }
 
-            CreateCategoryRequest category = new CreateCategoryRequest(name, desc);
-            categoryService.createCategory(category);
-            // To ensure the same stage that was initialized is closed
-            Stage stage = (Stage) nameField.getScene().getWindow();
-            stage.close();
+            closeStage();
         } catch (Exception e) {
             e.printStackTrace();
             showError("Failed to add category", e.getMessage());
         }
+    }
+
+    private void closeStage() {
+        Stage stage = (Stage) nameField.getScene().getWindow();
+        stage.close();
     }
 
     private void showError(String title, String message) {
