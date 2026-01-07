@@ -111,6 +111,7 @@
                               iconColor="#6b7280"/>
 
                     <TextField fx:id="searchField"
+                               onAction="#handleSearchAction"
                                promptText="Search categories..."
                                style="
                        -fx-border-color: transparent;
