@@ -13,6 +13,10 @@ public interface CategoryDAO {
 
     Optional<Category> findByName(String name) throws DAOException;
 
+    List<Category> searchByName(String query, int limit, int offset) throws DAOException;
+
+    int countByName(String query) throws DAOException;
+
     List<Category> findAll(int limit, int offset) throws DAOException;
 
     void save(Category category) throws DAOException;
