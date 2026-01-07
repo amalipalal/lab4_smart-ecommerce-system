@@ -142,6 +142,12 @@ public class AdminCategoryController {
         alert.showAndWait();
     }
 
+    public void handleSearchAction() {
+        currentSearchQuery = searchField.getText().trim();
+        pagination.setCurrentPageIndex(0);
+        setupPagination();
+    }
+
     public void handleAddCategory() {
         openCategoryModal("Add Category", null);
     }
