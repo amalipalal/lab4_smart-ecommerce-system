@@ -94,8 +94,35 @@
                   -fx-padding: 30;
               ">
 
-            <!-- Add Category Button -->
-            <HBox alignment="CENTER_RIGHT">
+            <!-- Search & Add Category Button -->
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <!-- Search box-->
+                <HBox alignment="CENTER_LEFT"
+                      spacing="6"
+                      style="
+                      -fx-background-color: white;
+                      -fx-padding: 8 8;
+                      -fx-background-radius: 10;
+                      -fx-border-color: #e5e7eb;
+                      -fx-border-radius: 10;
+                    ">
+                    <FontIcon iconLiteral="fas-search"
+                              iconSize="12"
+                              iconColor="#6b7280"/>
+
+                    <TextField fx:id="searchField"
+                               promptText="Search categories..."
+                               style="
+                       -fx-border-color: transparent;
+                       -fx-background-color: transparent;
+                       -fx-font-size: 13px;
+                       -fx-pref-width: 220;
+                   "/>
+                </HBox>
+
+                <Pane HBox.hgrow="ALWAYS"/>
+
+                <!-- Add category button -->
                 <Button fx:id="addCategoryBtn"
                         text="Add Category"
                         onAction="#handleAddCategory"
