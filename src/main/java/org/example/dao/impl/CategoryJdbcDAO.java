@@ -43,6 +43,10 @@ public class CategoryJdbcDAO implements CategoryDAO {
             WHERE category_id = ?
             """;
 
+    private static final String COUNT = """
+            SELECT COUNT(*) FROM category
+            """;
+
     @Override
     public Optional<Category> findById(UUID categoryId) throws DAOException {
         try(Connection conn = DBConnection.getConnection()) {
@@ -144,6 +148,26 @@ public class CategoryJdbcDAO implements CategoryDAO {
             });
         } catch (SQLException | DatabaseConnectionException e) {
             throw new DAOException("Failed to update " + category.getName() + "category.", e);
+        }
+    }
+
+    @Override
+    public int count() throws DAOException {
+        try(Connection conn = DBConnection.getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(COUNT);
+
+            try(ResultSet rs = ps.executeQuery()) {
+                if(rs.next()) {
+                    long rowCount = rs.getLong(1);
+                    if(rowCount > Integer.MAX_VALUE)
+                        throw new DAOException("Category count exceeds integer range: " + rowCount, null);
+                    return (int) rowCount;
+                } else {
+                    return 0;
+                }
+            }
+        } catch (SQLException | DatabaseConnectionException e) {
+            throw new DAOException("Failed to get category count.", e);
         }
     }
 }
