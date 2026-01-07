@@ -101,4 +101,12 @@ public class CategoryService {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
+
+    public int getCategoryCount() {
+        try {
+            return categoryDAO.count();
+        } catch (DAOException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
 }

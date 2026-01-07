@@ -19,4 +19,6 @@ public interface CategoryDAO {
 
     void update(Category category) throws DAOException;
 
+    int count() throws DAOException;
+
 }
