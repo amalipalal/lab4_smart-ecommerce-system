@@ -5,10 +5,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -28,16 +25,25 @@ public class AdminCategoryController {
     public TableColumn<CreateCategoryResponse, String> createdAtColumn;
     public TableColumn<CreateCategoryResponse, Void> actionsColumn;
     public Button addCategoryBtn;
+    public Pagination pagination;
 
     private final CategoryService categoryService;
 
     private final ObservableList<CreateCategoryResponse> categories = FXCollections.observableArrayList();
+
+    private static final int PAGE_SIZE = 5;
 
     public AdminCategoryController(CategoryService categoryService) {
         this.categoryService = categoryService;
     }
 
     public void initialize() {
+        setupColumns();
+        setupActionsColumn();
+        setupPagination();
+    }
+
+    private void setupColumns() {
         idColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(FormatUtil.shortId(cellData.getValue().categoryId())));
         nameColumn.setCellValueFactory(cellData ->
@@ -48,9 +54,6 @@ public class AdminCategoryController {
         createdAtColumn.setCellValueFactory(c ->
                 new SimpleStringProperty(FormatUtil.format(c.getValue().createdAt()))
         );
-
-        setupActionsColumn();
-        loadCategories(20, 0);
     }
 
     private void setupActionsColumn() {
@@ -92,35 +95,21 @@ public class AdminCategoryController {
         });
     }
 
-    public void handleAddCategory() {
-        openCategoryModal("Add Category", null);
-    }
+    private void setupPagination() {
+        int totalItems = categoryService.getCategoryCount();
+        int totalPages = (int) Math.ceil((double) totalItems / PAGE_SIZE);
 
-    private void openCategoryModal(String title, CreateCategoryResponse category) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/category-modal.fxml"));
-            CategoryModalController controller = new CategoryModalController(categoryService);
+        pagination.setPageCount(Math.max(totalPages, 1));
+        pagination.setCurrentPageIndex(0);
 
-            loader.setController(controller);
+        loadCategories(PAGE_SIZE, 0);
 
-            Stage modal = new Stage();
-            modal.setTitle(title);
-            modal.setScene(new Scene(loader.load()));
-            modal.initModality(Modality.APPLICATION_MODAL);
-
-            if(category != null)
-                controller.setCategory(category);
-
-            modal.showAndWait();
-            loadCategories(20, 0);
-        } catch (Exception e) {
-            e.printStackTrace();
-            showError("Failed to open modal", e.getMessage());
-        }
-    }
-
-    public void handleUpdateCategory(CreateCategoryResponse category) {
-       openCategoryModal("Update category", category);
+        // Listen for page changes
+        pagination.currentPageIndexProperty().addListener(
+                (obs, oldIndex, newIndex) -> {
+                    loadCategories(PAGE_SIZE, newIndex.intValue() * PAGE_SIZE);
+                }
+        );
     }
 
     private void loadCategories(int limit, int offset) {
@@ -141,5 +130,40 @@ public class AdminCategoryController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    public void handleAddCategory() {
+        openCategoryModal("Add Category", null);
+    }
+
+    public void handleUpdateCategory(CreateCategoryResponse category) {
+        openCategoryModal("Update category", category);
+    }
+
+    private void openCategoryModal(String title, CreateCategoryResponse category) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/category-modal.fxml"));
+            CategoryModalController controller = new CategoryModalController(categoryService);
+
+            loader.setController(controller);
+
+            Stage modal = new Stage();
+            modal.setTitle(title);
+            modal.setScene(new Scene(loader.load()));
+            modal.initModality(Modality.APPLICATION_MODAL);
+
+            if(category != null)
+                controller.setCategory(category);
+
+            modal.showAndWait();
+            refreshPagination();
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Failed to open modal", e.getMessage());
+        }
+    }
+
+    private void refreshPagination() {
+        setupPagination();
     }
 }
