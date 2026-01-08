@@ -5,9 +5,10 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.example.dto.category.CreateCategoryRequest;
-import org.example.dto.category.CreateCategoryResponse;
+import org.example.dto.category.CategoryResponse;
 import org.example.dto.category.UpdateCategoryRequest;
 import org.example.service.CategoryService;
+import org.example.util.DialogUtil;
 
 public class CategoryModalController {
     public TextField nameField;
@@ -15,13 +16,13 @@ public class CategoryModalController {
     public Button saveBtn;
 
     private final CategoryService categoryService;
-    private CreateCategoryResponse categoryToUpdate;
+    private CategoryResponse categoryToUpdate;
 
     public CategoryModalController(CategoryService categoryService) {
         this.categoryService = categoryService;
     }
 
-    public void setCategory(CreateCategoryResponse category) {
+    public void setCategory(CategoryResponse category) {
         this.categoryToUpdate = category;
 
         nameField.setText(category.name());
@@ -52,7 +53,6 @@ public class CategoryModalController {
 
             closeStage();
         } catch (Exception e) {
-            e.printStackTrace();
             showError("Failed to add category", e.getMessage());
         }
     }
@@ -63,10 +63,6 @@ public class CategoryModalController {
     }
 
     private void showError(String title, String message) {
-        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        DialogUtil.showError(title, message);
     }
 }

@@ -9,8 +9,9 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.example.dto.category.CreateCategoryResponse;
+import org.example.dto.category.CategoryResponse;
 import org.example.service.CategoryService;
+import org.example.util.DialogUtil;
 import org.example.util.FormatUtil;
 import org.kordamp.ikonli.javafx.FontIcon;
 
@@ -18,19 +19,19 @@ import java.util.List;
 
 public class AdminCategoryController {
 
-    public TableView<CreateCategoryResponse> categoryTable;
-    public TableColumn<CreateCategoryResponse, String> idColumn;
-    public TableColumn<CreateCategoryResponse, String> nameColumn;
-    public TableColumn<CreateCategoryResponse, String> descColumn;
-    public TableColumn<CreateCategoryResponse, String> createdAtColumn;
-    public TableColumn<CreateCategoryResponse, Void> actionsColumn;
+    public TableView<CategoryResponse> categoryTable;
+    public TableColumn<CategoryResponse, String> idColumn;
+    public TableColumn<CategoryResponse, String> nameColumn;
+    public TableColumn<CategoryResponse, String> descColumn;
+    public TableColumn<CategoryResponse, String> createdAtColumn;
+    public TableColumn<CategoryResponse, Void> actionsColumn;
     public Button addCategoryBtn;
     public Pagination pagination;
     public TextField searchField;
 
     private final CategoryService categoryService;
 
-    private final ObservableList<CreateCategoryResponse> categories = FXCollections.observableArrayList();
+    private final ObservableList<CategoryResponse> categories = FXCollections.observableArrayList();
 
     private static final int PAGE_SIZE = 5;
     private String currentSearchQuery = "";
@@ -61,8 +62,7 @@ public class AdminCategoryController {
     private void setupActionsColumn() {
         actionsColumn.setCellFactory(col -> new TableCell<>() {
             private final Button updateBtn = new Button("");
-            private final Button deleteBtn = new Button("");
-            private final HBox container = new HBox(5, updateBtn, deleteBtn);
+            private final HBox container = new HBox(5, updateBtn);
 
             {
                 FontIcon editIcon = new FontIcon("fas-edit");
@@ -70,22 +70,11 @@ public class AdminCategoryController {
                 updateBtn.setGraphic(editIcon);
                 updateBtn.getStyleClass().add("icon-btn");
 
-                FontIcon deleteIcon = new FontIcon("fas-trash");
-                deleteIcon.setIconSize(14);
-                deleteBtn.setGraphic(deleteIcon);
-                deleteBtn.getStyleClass().add("icon-btn danger");
-
                 updateBtn.setOnAction(e -> {
-                    CreateCategoryResponse category =
+                    CategoryResponse category =
                             getTableView().getItems().get(getIndex());
 
                     handleUpdateCategory(category);
-                });
-
-                deleteBtn.setOnAction(e -> {
-                    CreateCategoryResponse category =
-                            getTableView().getItems().get(getIndex());
-                    // TODO: delete confirmation + service call
                 });
             }
 
@@ -121,7 +110,7 @@ public class AdminCategoryController {
         try {
             categories.clear();
 
-            List<CreateCategoryResponse> result =
+            List<CategoryResponse> result =
                     currentSearchQuery.isBlank()
                             ? categoryService.getAllCategories(limit, offset)
                             : categoryService.getCategory(currentSearchQuery, limit, offset);
@@ -129,17 +118,12 @@ public class AdminCategoryController {
             categories.addAll(result);
             categoryTable.setItems(categories);
         } catch (Exception e) {
-            e.printStackTrace();
             showError("Failed to load categories", "Could not fetcch categories form te database.");
         }
     }
 
     private void showError(String title, String message) {
-        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        DialogUtil.showError(title, message);
     }
 
     public void handleSearchAction() {
@@ -152,11 +136,11 @@ public class AdminCategoryController {
         openCategoryModal("Add Category", null);
     }
 
-    public void handleUpdateCategory(CreateCategoryResponse category) {
+    public void handleUpdateCategory(CategoryResponse category) {
         openCategoryModal("Update category", category);
     }
 
-    private void openCategoryModal(String title, CreateCategoryResponse category) {
+    private void openCategoryModal(String title, CategoryResponse category) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/category-modal.fxml"));
             CategoryModalController controller = new CategoryModalController(categoryService);
@@ -174,7 +158,6 @@ public class AdminCategoryController {
             modal.showAndWait();
             refreshPagination();
         } catch (Exception e) {
-            e.printStackTrace();
             showError("Failed to open modal", e.getMessage());
         }
     }

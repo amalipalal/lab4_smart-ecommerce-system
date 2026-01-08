@@ -1,7 +1,7 @@
 import org.example.dao.CategoryDAO;
 import org.example.dao.exception.DAOException;
 import org.example.dto.category.CreateCategoryRequest;
-import org.example.dto.category.CreateCategoryResponse;
+import org.example.dto.category.CategoryResponse;
 import org.example.model.Category;
 import org.example.service.CategoryService;
 import org.example.service.exception.CategoryNotFoundException;
@@ -55,7 +55,7 @@ public class CategoryServiceTest {
         CreateCategoryRequest request = new CreateCategoryRequest("name", "description");
 
         when(categoryDAO.findByName(any())).thenReturn(Optional.empty());
-        CreateCategoryResponse response = categoryService.createCategory(request);
+        CategoryResponse response = categoryService.createCategory(request);
 
         String expected = request.name();
         String actual = response.name();

@@ -18,6 +18,7 @@ public record CategoryResponse(
                 category.getName(),
                 category.getDescription(),
                 category.getCreatedAt(),
-                category.getUpdatedAt());
+                category.getUpdatedAt()
+        );
     }
 }
