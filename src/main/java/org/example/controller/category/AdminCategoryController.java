@@ -9,7 +9,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.example.dto.category.CreateCategoryResponse;
+import org.example.dto.category.CategoryResponse;
 import org.example.service.CategoryService;
 import org.example.util.DialogUtil;
 import org.example.util.FormatUtil;
@@ -19,19 +19,19 @@ import java.util.List;
 
 public class AdminCategoryController {
 
-    public TableView<CreateCategoryResponse> categoryTable;
-    public TableColumn<CreateCategoryResponse, String> idColumn;
-    public TableColumn<CreateCategoryResponse, String> nameColumn;
-    public TableColumn<CreateCategoryResponse, String> descColumn;
-    public TableColumn<CreateCategoryResponse, String> createdAtColumn;
-    public TableColumn<CreateCategoryResponse, Void> actionsColumn;
+    public TableView<CategoryResponse> categoryTable;
+    public TableColumn<CategoryResponse, String> idColumn;
+    public TableColumn<CategoryResponse, String> nameColumn;
+    public TableColumn<CategoryResponse, String> descColumn;
+    public TableColumn<CategoryResponse, String> createdAtColumn;
+    public TableColumn<CategoryResponse, Void> actionsColumn;
     public Button addCategoryBtn;
     public Pagination pagination;
     public TextField searchField;
 
     private final CategoryService categoryService;
 
-    private final ObservableList<CreateCategoryResponse> categories = FXCollections.observableArrayList();
+    private final ObservableList<CategoryResponse> categories = FXCollections.observableArrayList();
 
     private static final int PAGE_SIZE = 5;
     private String currentSearchQuery = "";
@@ -77,16 +77,10 @@ public class AdminCategoryController {
                 deleteBtn.getStyleClass().add("icon-btn danger");
 
                 updateBtn.setOnAction(e -> {
-                    CreateCategoryResponse category =
+                    CategoryResponse category =
                             getTableView().getItems().get(getIndex());
 
                     handleUpdateCategory(category);
-                });
-
-                deleteBtn.setOnAction(e -> {
-                    CreateCategoryResponse category =
-                            getTableView().getItems().get(getIndex());
-                    // TODO: delete confirmation + service call
                 });
             }
 
@@ -122,7 +116,7 @@ public class AdminCategoryController {
         try {
             categories.clear();
 
-            List<CreateCategoryResponse> result =
+            List<CategoryResponse> result =
                     currentSearchQuery.isBlank()
                             ? categoryService.getAllCategories(limit, offset)
                             : categoryService.getCategory(currentSearchQuery, limit, offset);
@@ -148,11 +142,11 @@ public class AdminCategoryController {
         openCategoryModal("Add Category", null);
     }
 
-    public void handleUpdateCategory(CreateCategoryResponse category) {
+    public void handleUpdateCategory(CategoryResponse category) {
         openCategoryModal("Update category", category);
     }
 
-    private void openCategoryModal(String title, CreateCategoryResponse category) {
+    private void openCategoryModal(String title, CategoryResponse category) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/category-modal.fxml"));
             CategoryModalController controller = new CategoryModalController(categoryService);
