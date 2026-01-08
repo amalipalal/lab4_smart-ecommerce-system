@@ -26,12 +26,14 @@ public class AdminCategoryController {
     public TableColumn<CreateCategoryResponse, Void> actionsColumn;
     public Button addCategoryBtn;
     public Pagination pagination;
+    public TextField searchField;
 
     private final CategoryService categoryService;
 
     private final ObservableList<CreateCategoryResponse> categories = FXCollections.observableArrayList();
 
     private static final int PAGE_SIZE = 5;
+    private String currentSearchQuery = "";
 
     public AdminCategoryController(CategoryService categoryService) {
         this.categoryService = categoryService;
@@ -96,7 +98,10 @@ public class AdminCategoryController {
     }
 
     private void setupPagination() {
-        int totalItems = categoryService.getCategoryCount();
+        int totalItems = this.currentSearchQuery.isBlank()
+                ? categoryService.getCategoryCount()
+                : categoryService.countCategoriesByName(currentSearchQuery);
+
         int totalPages = (int) Math.ceil((double) totalItems / PAGE_SIZE);
 
         pagination.setPageCount(Math.max(totalPages, 1));
@@ -115,8 +120,13 @@ public class AdminCategoryController {
     private void loadCategories(int limit, int offset) {
         try {
             categories.clear();
-            List<CreateCategoryResponse> all = categoryService.getAllCategories(limit, offset);
-            categories.addAll(all);
+
+            List<CreateCategoryResponse> result =
+                    currentSearchQuery.isBlank()
+                            ? categoryService.getAllCategories(limit, offset)
+                            : categoryService.getCategory(currentSearchQuery, limit, offset);
+
+            categories.addAll(result);
             categoryTable.setItems(categories);
         } catch (Exception e) {
             e.printStackTrace();
@@ -130,6 +140,12 @@ public class AdminCategoryController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    public void handleSearchAction() {
+        currentSearchQuery = searchField.getText().trim();
+        pagination.setCurrentPageIndex(0);
+        setupPagination();
     }
 
     public void handleAddCategory() {

@@ -25,6 +25,20 @@ public class CategoryJdbcDAO implements CategoryDAO {
             WHERE name = ?
             """;
 
+    private static final String SEARCH_BY_NAME = """
+            SELECT *
+            FROM category
+            WHERE LOWER(name) LIKE LOWER(?)
+            ORDER BY name ASC
+            LIMIT ? OFFSET ?
+            """;
+
+    private static final String COUNT_BY_NAME = """
+        SELECT COUNT(*)
+        FROM category
+        WHERE LOWER(name) LIKE LOWER(?)
+        """;
+
     private static final String FIND_ALL = """
             SELECT * FROM category
             ORDER BY name ASC
@@ -89,6 +103,46 @@ public class CategoryJdbcDAO implements CategoryDAO {
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public List<Category> searchByName(String query, int limit, int offset) throws DAOException {
+        List<Category> categories = new ArrayList<>();
+
+        try (Connection conn = DBConnection.getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(SEARCH_BY_NAME);
+
+            ps.setString(1, "%" + query + "%");
+            ps.setInt(2, limit);
+            ps.setInt(3, offset);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    categories.add(map(rs));
+                }
+            }
+        } catch (SQLException | DatabaseConnectionException e) {
+            throw new DAOException("Failed to search categories by name", e);
+        }
+
+        return categories;
+    }
+
+    @Override
+    public int countByName(String query) throws DAOException {
+        try (Connection conn = DBConnection.getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(COUNT_BY_NAME);
+            ps.setString(1, "%" + query + "%");
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+                return 0;
+            }
+        } catch (SQLException | DatabaseConnectionException e) {
+            throw new DAOException("Failed to count categories by name", e);
+        }
     }
 
     @Override

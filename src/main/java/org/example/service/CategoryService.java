@@ -93,6 +93,23 @@ public class CategoryService {
         }
     }
 
+    public List<CreateCategoryResponse> getCategory(String query, int limit, int offset) {
+        try {
+            List<Category> categories = this.categoryDAO.searchByName(query, limit, offset);
+            return categories.stream().map(CreateCategoryResponse::new).toList();
+        } catch (DAOException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    public int countCategoriesByName(String query) {
+        try {
+            return this.categoryDAO.countByName(query);
+        } catch (DAOException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
     public List<CreateCategoryResponse> getAllCategories(int limit, int offset) {
         try {
             List<Category> allCategories = categoryDAO.findAll(limit, offset);
