@@ -2,9 +2,8 @@ package org.example.service;
 
 import org.example.dao.CategoryDAO;
 import org.example.dao.exception.DAOException;
-import org.example.dto.category.CategoryResponse;
 import org.example.dto.category.CreateCategoryRequest;
-import org.example.dto.category.CreateCategoryResponse;
+import org.example.dto.category.CategoryResponse;
 import org.example.dto.category.UpdateCategoryRequest;
 import org.example.model.Category;
 import org.example.service.exception.CategoryNotFoundException;
@@ -22,7 +21,7 @@ public class CategoryService {
         this.categoryDAO = categoryDAO;
     }
 
-    public CreateCategoryResponse createCategory(CreateCategoryRequest request) {
+    public CategoryResponse createCategory(CreateCategoryRequest request) {
         try {
             if (this.categoryDAO.findByName(request.name()).isPresent())
                 throw new DuplicateCategoryException(request.name());
@@ -36,8 +35,7 @@ public class CategoryService {
             );
             this.categoryDAO.save(category);
 
-            return new CreateCategoryResponse(
-                    category.getCategoryId(), category.getName(), category.getDescription(), category.getCreatedAt());
+            return new CategoryResponse(category);
         } catch (DAOException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -67,36 +65,34 @@ public class CategoryService {
         }
     }
 
-    public CreateCategoryResponse getCategory(UUID categoryId) {
+    public CategoryResponse getCategory(UUID categoryId) {
         try {
             var category = this.categoryDAO.findById(categoryId)
                     .orElseThrow(() ->
                             new CategoryNotFoundException(categoryId.toString()));
 
-            return new CreateCategoryResponse(
-                    category.getCategoryId(), category.getName(), category.getDescription(), category.getCreatedAt());
+            return new CategoryResponse(category);
         } catch (DAOException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
 
-    public CreateCategoryResponse getCategory(String name) {
+    public CategoryResponse getCategory(String name) {
         try {
             var category = this.categoryDAO.findByName(name)
                     .orElseThrow(() ->
                             new CategoryNotFoundException(name));
 
-            return new CreateCategoryResponse(
-                    category.getCategoryId(), category.getName(), category.getDescription(), category.getCreatedAt());
+            return new CategoryResponse(category);
         } catch (DAOException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
 
-    public List<CreateCategoryResponse> getCategory(String query, int limit, int offset) {
+    public List<CategoryResponse> getCategory(String query, int limit, int offset) {
         try {
             List<Category> categories = this.categoryDAO.searchByName(query, limit, offset);
-            return categories.stream().map(CreateCategoryResponse::new).toList();
+            return categories.stream().map(CategoryResponse::new).toList();
         } catch (DAOException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -110,10 +106,10 @@ public class CategoryService {
         }
     }
 
-    public List<CreateCategoryResponse> getAllCategories(int limit, int offset) {
+    public List<CategoryResponse> getAllCategories(int limit, int offset) {
         try {
             List<Category> allCategories = categoryDAO.findAll(limit, offset);
-            return allCategories.stream().map(CreateCategoryResponse::new).toList();
+            return allCategories.stream().map(CategoryResponse::new).toList();
         } catch (DAOException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
