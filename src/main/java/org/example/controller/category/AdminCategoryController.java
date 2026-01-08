@@ -11,6 +11,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.example.dto.category.CreateCategoryResponse;
 import org.example.service.CategoryService;
+import org.example.util.DialogUtil;
 import org.example.util.FormatUtil;
 import org.kordamp.ikonli.javafx.FontIcon;
 
@@ -129,17 +130,12 @@ public class AdminCategoryController {
             categories.addAll(result);
             categoryTable.setItems(categories);
         } catch (Exception e) {
-            e.printStackTrace();
             showError("Failed to load categories", "Could not fetcch categories form te database.");
         }
     }
 
     private void showError(String title, String message) {
-        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        DialogUtil.showError(title, message);
     }
 
     public void handleSearchAction() {
@@ -174,7 +170,6 @@ public class AdminCategoryController {
             modal.showAndWait();
             refreshPagination();
         } catch (Exception e) {
-            e.printStackTrace();
             showError("Failed to open modal", e.getMessage());
         }
     }
