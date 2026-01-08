@@ -62,19 +62,13 @@ public class AdminCategoryController {
     private void setupActionsColumn() {
         actionsColumn.setCellFactory(col -> new TableCell<>() {
             private final Button updateBtn = new Button("");
-            private final Button deleteBtn = new Button("");
-            private final HBox container = new HBox(5, updateBtn, deleteBtn);
+            private final HBox container = new HBox(5, updateBtn);
 
             {
                 FontIcon editIcon = new FontIcon("fas-edit");
                 editIcon.setIconSize(14);
                 updateBtn.setGraphic(editIcon);
                 updateBtn.getStyleClass().add("icon-btn");
-
-                FontIcon deleteIcon = new FontIcon("fas-trash");
-                deleteIcon.setIconSize(14);
-                deleteBtn.setGraphic(deleteIcon);
-                deleteBtn.getStyleClass().add("icon-btn danger");
 
                 updateBtn.setOnAction(e -> {
                     CategoryResponse category =
