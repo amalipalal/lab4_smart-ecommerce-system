@@ -1,0 +1,135 @@
+package org.example.controller.product;
+
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import org.example.dto.product.ProductResponse;
+import org.example.service.CategoryService;
+import org.example.service.ProductService;
+import org.example.util.DialogUtil;
+import org.example.util.FormatUtil;
+import org.kordamp.ikonli.javafx.FontIcon;
+
+import java.util.List;
+
+public class AdminProductController {
+
+    public TableView<ProductResponse> productTable;
+    public TableColumn<ProductResponse, String> idColumn;
+    public TableColumn<ProductResponse, String> nameColumn;
+    public TableColumn<ProductResponse, String> descColumn;
+    public TableColumn<ProductResponse, String> priceColumn;
+    public TableColumn<ProductResponse, String> stockColumn;
+    public TableColumn<ProductResponse, String> createdAtColumn;
+    public TableColumn<ProductResponse, Void> actionsColumn;
+
+    public Button addProductBtn;
+    public TextField searchField;
+
+    private final ProductService productService;
+    private final CategoryService categoryService;
+    private final ObservableList<ProductResponse> products = FXCollections.observableArrayList();
+
+    private static final int PAGE_SIZE = 5;
+    private String currentSearchQuery = "";
+
+    public AdminProductController(ProductService productService, CategoryService categoryService) {
+        this.productService = productService;
+        this.categoryService = categoryService;
+    }
+
+    public void initialize() {
+        setupColumns();
+        setupActionsColumn();
+    }
+
+    private void setupColumns() {
+        idColumn.setCellValueFactory(c ->
+                new SimpleStringProperty(FormatUtil.shortId(c.getValue().productId())));
+
+        nameColumn.setCellValueFactory(c ->
+                new SimpleStringProperty(c.getValue().name()));
+
+        descColumn.setCellValueFactory(c ->
+                new SimpleStringProperty(FormatUtil.truncate(c.getValue().description(), 50)));
+
+        priceColumn.setCellValueFactory(c ->
+                new SimpleStringProperty(FormatUtil.currency(c.getValue().price())));
+
+        stockColumn.setCellValueFactory(c ->
+                new SimpleStringProperty(Integer.toString(c.getValue().stock())));
+
+        createdAtColumn.setCellValueFactory(c ->
+                new SimpleStringProperty(FormatUtil.format(c.getValue().updatedAt())));
+    }
+
+    private void setupActionsColumn() {
+        actionsColumn.setCellFactory(col -> new TableCell<>() {
+            private final Button editBtn = new Button("");
+            private final HBox container = new HBox(5, editBtn);
+
+            {
+                FontIcon icon = new FontIcon("fas-edit");
+                icon.setIconSize(14);
+                editBtn.setGraphic(icon);
+                editBtn.getStyleClass().add("icon-btn");
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                setGraphic(empty ? null : container);
+            }
+        });
+    }
+
+    private void loadProducts(int limit, int offset) {
+        try {
+            products.clear();
+
+            List<ProductResponse> result =
+                    currentSearchQuery.isBlank()
+                            ? productService.getAllProducts(limit, offset)
+                            : productService.searchProducts(currentSearchQuery, limit, offset);
+
+            products.addAll(result);
+            productTable.setItems(products);
+        } catch (Exception e) {
+            DialogUtil.showError("Error", "Failed to load products");
+        }
+    }
+
+    public void handleAddProduct() {
+        openProductModal("Add Product", null);
+    }
+
+    private void openProductModal(String title, ProductResponse product) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/product-modal.fxml"));
+
+            ProductModalController controller = new ProductModalController(this.productService, this.categoryService);
+
+            loader.setController(controller);
+
+            Stage modal = new Stage();
+            modal.setTitle(title);
+            modal.setScene(new Scene(loader.load()));
+            modal.initModality(Modality.APPLICATION_MODAL);
+
+            if(product != null)
+                controller.setProduct(product);
+
+            modal.showAndWait();
+            loadProducts(20, 0);
+        } catch (Exception e) {
+            DialogUtil.showError("Error", e.getMessage());
+        }
+    }
+
+}
