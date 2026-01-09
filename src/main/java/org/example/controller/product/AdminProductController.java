@@ -122,6 +122,22 @@ public class AdminProductController {
         openProductModal("Update product", product);
     }
 
+    private void handleDeleteProduct(ProductResponse product) {
+        boolean confirmed = DialogUtil.showConfirm(
+                "Delete Product",
+                "Are you sure you want to delete \"" + product.name() + "\"?"
+        );
+
+        if (!confirmed) return;
+
+        try {
+            productService.deleteProduct(product.productId());
+            refreshPagination();
+        } catch (Exception e) {
+            DialogUtil.showError("Error", "Failed to delete product");
+        }
+    }
+
     private void setupPagination() {
         int totalItems = this.currentSearchQuery.isBlank()
                 ? productService.getProductCount()
