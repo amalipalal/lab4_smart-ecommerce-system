@@ -142,7 +142,7 @@ public class AdminCategoryController {
 
     private void openCategoryModal(String title, CategoryResponse category) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/category-modal.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/admin/category-modal.fxml"));
             CategoryModalController controller = new CategoryModalController(categoryService);
 
             loader.setController(controller);
