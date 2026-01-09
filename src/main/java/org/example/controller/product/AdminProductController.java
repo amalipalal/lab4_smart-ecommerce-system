@@ -7,15 +7,15 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.example.dto.product.ProductResponse;
 import org.example.service.CategoryService;
 import org.example.service.ProductService;
+import org.example.ui.ActionCell;
+import org.example.ui.ActionDefinition;
 import org.example.util.DialogUtil;
 import org.example.util.FormatUtil;
-import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.List;
 import java.util.UUID;
@@ -96,30 +96,40 @@ public class AdminProductController {
     }
 
     private void setupActionsColumn() {
-        actionsColumn.setCellFactory(col -> new TableCell<>() {
-            private final Button editBtn = new Button("");
-            private final HBox container = new HBox(5, editBtn);
-
-            {
-                FontIcon icon = new FontIcon("fas-edit");
-                icon.setIconSize(14);
-                editBtn.setGraphic(icon);
-                editBtn.getStyleClass().add("icon-btn");
-                editBtn.setOnAction( e -> {
-                    handleUpdateProduct(getTableView().getItems().get(getIndex()));
-                });
-            }
-
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                setGraphic(empty ? null : container);
-            }
-        });
+        actionsColumn.setCellFactory(col -> new ActionCell<>(
+                List.of(
+                        new ActionDefinition<>(
+                                "fas-edit",
+                                14,
+                                "icon-btn",
+                                this::handleUpdateProduct),
+                        new ActionDefinition<>(
+                                "fas-trash",
+                                14,
+                                "icon-btn danger",
+                                this::handleDeleteProduct)
+                )
+        ));
     }
 
-    protected  void handleUpdateProduct(ProductResponse product) {
+    private void handleUpdateProduct(ProductResponse product) {
         openProductModal("Update product", product);
+    }
+
+    private void handleDeleteProduct(ProductResponse product) {
+        boolean confirmed = DialogUtil.showConfirm(
+                "Delete Product",
+                "Are you sure you want to delete \"" + product.name() + "\"?"
+        );
+
+        if (!confirmed) return;
+
+        try {
+            productService.deleteProduct(product.productId());
+            refreshPagination();
+        } catch (Exception e) {
+            DialogUtil.showError("Error", "Failed to delete product");
+        }
     }
 
     private void setupPagination() {
