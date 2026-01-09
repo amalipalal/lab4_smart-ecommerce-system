@@ -65,8 +65,7 @@ public class AdminProductController {
     protected void initialize() {
         setupColumns();
         setupActionsColumn();
-
-        loadProducts(20,0);
+        setupPagination();
     }
 
     private void setupColumns() {
@@ -174,7 +173,7 @@ public class AdminProductController {
                 controller.setProduct(product);
 
             modal.showAndWait();
-            loadProducts(20, 0);
+            refreshPagination();
         } catch (Exception e) {
             DialogUtil.showError("Error", e.getMessage());
         }
