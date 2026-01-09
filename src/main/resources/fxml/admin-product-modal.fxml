@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="12"
+      xmlns="http://javafx.com/javafx/21.0.2"
+      xmlns:fx="http://javafx.com/fxml/1"
+      style="-fx-padding: 20;">
+
+    <!-- Category Drop down-->
+    <ComboBox fx:id="categoryBox"
+              promptText="Select category"
+              style="
+                  -fx-background-radius: 8;
+                  -fx-pref-width: 260;
+              "/>
+
+    <TextField fx:id="nameField" promptText="Product name"/>
+    <TextArea fx:id="descField" promptText="Description"/>
+    <TextField fx:id="priceField" promptText="Price"/>
+    <TextField fx:id="stockField" promptText="Stock" />
+
+    <Button fx:id="saveBtn"
+            text="Save Product"
+            onAction="#handleSave"/>
+</VBox>
