@@ -46,10 +46,14 @@ public class AdminProductController {
     @FXML
     private TextField searchField;
 
+    @FXML
+    private Pagination pagination;
+
     private final ProductService productService;
     private final CategoryService categoryService;
     private final ObservableList<ProductResponse> products = FXCollections.observableArrayList();
 
+    private final int PAGE_SIZE = 5;
     private String currentSearchQuery = "";
 
     public AdminProductController(ProductService productService, CategoryService categoryService) {
@@ -112,6 +116,26 @@ public class AdminProductController {
         });
     }
 
+    private void setupPagination() {
+        int totalItems = this.currentSearchQuery.isBlank()
+                ? productService.getProductCount()
+                : productService.countProductsByName(currentSearchQuery);
+
+        int totalPages = (int) Math.ceil((double) totalItems / PAGE_SIZE);
+
+        pagination.setPageCount(Math.max(totalPages, 1));
+        pagination.setCurrentPageIndex(0);
+
+        loadProducts(PAGE_SIZE, 0);
+
+        // Listen for page changes
+        pagination.currentPageIndexProperty().addListener(
+                (obs, oldIndex, newIndex) -> {
+                    loadProducts(PAGE_SIZE, newIndex.intValue() * PAGE_SIZE);
+                }
+        );
+    }
+
     private void loadProducts(int limit, int offset) {
         try {
             products.clear();
@@ -154,6 +178,10 @@ public class AdminProductController {
         } catch (Exception e) {
             DialogUtil.showError("Error", e.getMessage());
         }
+    }
+
+    private void refreshPagination() {
+        setupPagination();
     }
 
 }
