@@ -13,7 +13,7 @@ public class Main extends Application {
         ApplicationControllerFactory factory = new ApplicationControllerFactory(context);
 
         FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/fxml/base-category.fxml")
+                getClass().getResource("/fxml/admin-product.fxml")
         );
         loader.setControllerFactory(factory);
         Parent root = loader.load();
