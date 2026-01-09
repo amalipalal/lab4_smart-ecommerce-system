@@ -13,7 +13,7 @@ import org.example.util.FormatUtil;
 
 public class ProductModalController {
 
-    public ComboBox<CategoryResponse> categoryResponseComboBox;
+    public ComboBox<CategoryResponse> categoryBox;
     public TextField nameField;
     public TextField stockField;
     public TextField priceField;
@@ -35,13 +35,13 @@ public class ProductModalController {
 
     private void loadCategories() {
         try {
-            categoryResponseComboBox.setItems(
+            categoryBox.setItems(
                     FXCollections.observableList(
                             categoryService.getAllCategories(20, 0)
                     )
             );
 
-            categoryResponseComboBox.setCellFactory(cb -> new ListCell<>() {
+            categoryBox.setCellFactory(cb -> new ListCell<>() {
                 @Override
                 protected  void updateItem(CategoryResponse item, boolean empty) {
                     super.updateItem(item, empty);
@@ -49,7 +49,7 @@ public class ProductModalController {
                 }
             });
 
-            categoryResponseComboBox.setButtonCell(categoryResponseComboBox.getCellFactory().call(null));
+            categoryBox.setButtonCell(categoryBox.getCellFactory().call(null));
 
         } catch (Exception e) {
             DialogUtil.showError("Error", "Failed to load categories");
@@ -65,17 +65,17 @@ public class ProductModalController {
         descField.setText(product.description());
 
         // Preselect the category of the product being updated
-        categoryResponseComboBox.getItems().stream()
+        categoryBox.getItems().stream()
                 .filter(c -> c.categoryId().equals(product.categoryId()))
                 .findFirst()
-                .ifPresent(categoryResponseComboBox::setValue);
+                .ifPresent(categoryBox::setValue);
 
         saveBtn.setText("Update product");
     }
 
     public void handleSave() {
         try {
-            CategoryResponse selectedCategory = categoryResponseComboBox.getValue();
+            CategoryResponse selectedCategory = categoryBox.getValue();
 
             if(selectedCategory == null) {
                 DialogUtil.showError("Validation", "Category is required");
