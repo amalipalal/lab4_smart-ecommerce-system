@@ -44,7 +44,7 @@ public class ProductJdbcDAO implements ProductDAO {
             """;
 
     private static final String COUNT_BY_NAME = """
-            SELECT COUNT(*) product
+            SELECT COUNT(*) FROM product
             WHERE LOWER(name) LIKE LOWER(?)
             """;
 
