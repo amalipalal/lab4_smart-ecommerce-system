@@ -19,23 +19,43 @@
                       style="-fx-background-color: white;
                              -fx-padding: 8;
                              -fx-background-radius: 10;
-                             -fx-border-color: #e5e7eb;">
-                    <FontIcon iconLiteral="fas-search" iconSize="12"/>
+                             -fx-border-color: #e5e7eb;
+                             -fx-border-radius: 10;
+                       ">
+                    <FontIcon iconLiteral="fas-search"
+                              iconSize="12"
+                              iconColor="#6b7280"/>
                     <TextField fx:id="searchField"
                                onAction="#handleSearchAction"
                                promptText="Search products..."
                                style="-fx-background-color: transparent;
-                                      -fx-border-color: transparent;"/>
+                                      -fx-border-color: transparent;
+                                      -fx-font-size: 13px;
+                                      -fx-pref-width: 220;
+                               "/>
                 </HBox>
 
                 <Pane HBox.hgrow="ALWAYS"/>
 
                 <Button fx:id="addProductBtn"
                         text="Add Product"
-                        onAction="#handleAddProduct">
+                        onAction="#handleAddProduct"
+                        style="
+                            -fx-background-color: #1f2933;
+                            -fx-text-fill: white;
+                            -fx-font-size: 12px;
+                            -fx-padding: 10 16;
+                            -fx-background-radius: 10;
+                            -fx-cursor: hand;
+                        ">
                     <graphic>
-                        <FontIcon iconLiteral="fas-plus"/>
+                        <FontIcon iconLiteral="fas-plus"
+                                  iconSize="12"
+                                  iconColor="white"/>
                     </graphic>
+                    <tooltip>
+                        <Tooltip text="Add Product"/>
+                    </tooltip>
                 </Button>
             </HBox>
 
