@@ -1,6 +1,7 @@
 package org.example.controller.product;
 
 import javafx.collections.FXCollections;
+import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.example.dto.category.CategoryResponse;
@@ -16,12 +17,18 @@ import java.util.UUID;
 
 public class ProductModalController {
 
-    public ComboBox<CategoryResponse> categoryBox;
-    public TextField nameField;
-    public TextField stockField;
-    public TextField priceField;
-    public TextArea descField;
-    public Button saveBtn;
+    @FXML
+    private ComboBox<CategoryResponse> categoryBox;
+    @FXML
+    private TextField nameField;
+    @FXML
+    private TextField stockField;
+    @FXML
+    private TextField priceField;
+    @FXML
+    private TextArea descField;
+    @FXML
+    private Button saveBtn;
 
     private final ProductService productService;
     private final CategoryService categoryService;
@@ -32,7 +39,8 @@ public class ProductModalController {
         this.categoryService = categoryService;
     }
 
-    public void initialize() {
+    @FXML
+    protected void initialize() {
         loadCategories();
     }
 
@@ -76,7 +84,8 @@ public class ProductModalController {
         saveBtn.setText("Update product");
     }
 
-    public void handleSave() {
+    @FXML
+    protected void handleSave() {
         try {
             if(!validateInputs()) return;
 
