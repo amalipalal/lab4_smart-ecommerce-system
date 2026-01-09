@@ -44,7 +44,7 @@ public class ProductJdbcDAO implements ProductDAO {
             """;
 
     private static final String COUNT_BY_NAME = """
-            SELECT COUNT(*) product
+            SELECT COUNT(*) FROM product
             WHERE LOWER(name) LIKE LOWER(?)
             """;
 
@@ -192,7 +192,7 @@ public class ProductJdbcDAO implements ProductDAO {
     public int countByName(String query) throws DAOException {
         try(Connection conn = DBConnection.getConnection()){
             PreparedStatement ps = conn.prepareStatement(COUNT_BY_NAME);
-            ps.setString(1, query);
+            ps.setString(1, "%" + query + "%");
 
             try(ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {

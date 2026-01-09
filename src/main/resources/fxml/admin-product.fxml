@@ -22,6 +22,7 @@
                              -fx-border-color: #e5e7eb;">
                     <FontIcon iconLiteral="fas-search" iconSize="12"/>
                     <TextField fx:id="searchField"
+                               onAction="#handleSearchAction"
                                promptText="Search products..."
                                style="-fx-background-color: transparent;
                                       -fx-border-color: transparent;"/>
