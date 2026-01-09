@@ -3,6 +3,7 @@ package org.example.controller.product;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -40,14 +41,15 @@ public class AdminProductController {
     @FXML
     private TableColumn<ProductResponse, Void> actionsColumn;
 
-    public Button addProductBtn;
-    public TextField searchField;
+    @FXML
+    private Button addProductBtn;
+    @FXML
+    private TextField searchField;
 
     private final ProductService productService;
     private final CategoryService categoryService;
     private final ObservableList<ProductResponse> products = FXCollections.observableArrayList();
 
-    private static final int PAGE_SIZE = 5;
     private String currentSearchQuery = "";
 
     public AdminProductController(ProductService productService, CategoryService categoryService) {
@@ -55,7 +57,8 @@ public class AdminProductController {
         this.categoryService = categoryService;
     }
 
-    public void initialize() {
+    @FXML
+    protected void initialize() {
         setupColumns();
         setupActionsColumn();
 
@@ -125,7 +128,8 @@ public class AdminProductController {
         }
     }
 
-    public void handleAddProduct() {
+    @FXML
+    protected void handleAddProduct() {
         openProductModal("Add Product", null);
     }
 
