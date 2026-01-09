@@ -6,6 +6,7 @@ import javafx.stage.Stage;
 import org.example.dto.category.CategoryResponse;
 import org.example.dto.product.CreateProductRequest;
 import org.example.dto.product.ProductResponse;
+import org.example.dto.product.UpdateProductRequest;
 import org.example.service.CategoryService;
 import org.example.service.ProductService;
 import org.example.util.DialogUtil;
@@ -84,7 +85,7 @@ public class ProductModalController {
 
             String name = nameField.getText();
             int stock = Integer.parseInt(stockField.getText());
-            double price = Double.parseDouble(priceField.getText());
+            double price = FormatUtil.currency(priceField.getText());
             String desc = descField.getText();
 
             if(name.isBlank()) {
@@ -100,6 +101,17 @@ public class ProductModalController {
                                 price,
                                 stock,
                                 selectedCategory.categoryId()
+                        )
+                );
+            } else {
+                productService.updateProduct(
+                        productToUpdate.productId(),
+                        new UpdateProductRequest(
+                                name,
+                                desc,
+                                price,
+                                selectedCategory.categoryId(),
+                                stock
                         )
                 );
             }
