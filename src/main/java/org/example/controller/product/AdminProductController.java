@@ -17,6 +17,7 @@ import org.example.util.FormatUtil;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.List;
+import java.util.UUID;
 
 public class AdminProductController {
 
@@ -28,6 +29,7 @@ public class AdminProductController {
     public TableColumn<ProductResponse, String> stockColumn;
     public TableColumn<ProductResponse, String> createdAtColumn;
     public TableColumn<ProductResponse, Void> actionsColumn;
+    private TableColumn<ProductResponse, String> categoryColumn;
 
     public Button addProductBtn;
     public TextField searchField;
@@ -65,8 +67,15 @@ public class AdminProductController {
         stockColumn.setCellValueFactory(c ->
                 new SimpleStringProperty(Integer.toString(c.getValue().stock())));
 
+        categoryColumn.setCellValueFactory(c ->
+                new SimpleStringProperty(getCategoryName(c.getValue().categoryId())));
+
         createdAtColumn.setCellValueFactory(c ->
                 new SimpleStringProperty(FormatUtil.format(c.getValue().updatedAt())));
+    }
+
+    private String getCategoryName(UUID categoryId) {
+        return this.categoryService.getCategory(categoryId).name();
     }
 
     private void setupActionsColumn() {

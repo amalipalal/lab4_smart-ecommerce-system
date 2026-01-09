@@ -50,7 +50,8 @@
                     <TableColumn fx:id="descColumn" text="Description"/>
                     <TableColumn fx:id="priceColumn" text="Price"/>
                     <TableColumn fx:id="stockColumn" text="Stock"/>
-                    <TableColumn fx:id="createdAtColumn" text="Created"/>
+                    <TableColumn fx:id="categoryColumn" text="Category" />
+                    <TableColumn fx:id="createdAtColumn" text="Updated At"/>
                     <TableColumn fx:id="actionsColumn" text="Actions"/>
                 </columns>
             </TableView>
