@@ -12,6 +12,8 @@ import org.example.service.ProductService;
 import org.example.util.DialogUtil;
 import org.example.util.FormatUtil;
 
+import java.util.UUID;
+
 public class ProductModalController {
 
     public ComboBox<CategoryResponse> categoryBox;
@@ -76,49 +78,44 @@ public class ProductModalController {
 
     public void handleSave() {
         try {
-            CategoryResponse selectedCategory = categoryBox.getValue();
+            if(!validateInputs()) return;
 
-            if(selectedCategory == null) {
-                DialogUtil.showError("Validation", "Category is required");
-                return;
-            }
+            var request = buildRequest();
 
-            String name = nameField.getText();
-            int stock = Integer.parseInt(stockField.getText());
-            double price = FormatUtil.currency(priceField.getText());
-            String desc = descField.getText();
-
-            if(name.isBlank()) {
-                DialogUtil.showError("Validation", "Product name is required");
-                return;
-            }
-
-            if (productToUpdate == null) {
-                productService.createProduct(
-                        new CreateProductRequest(
-                                name,
-                                desc,
-                                price,
-                                stock,
-                                selectedCategory.categoryId()
-                        )
-                );
-            } else {
-                productService.updateProduct(
-                        productToUpdate.productId(),
-                        new UpdateProductRequest(
-                                name,
-                                desc,
-                                price,
-                                selectedCategory.categoryId(),
-                                stock
-                        )
-                );
-            }
+            if(productToUpdate == null)
+                productService.createProduct((CreateProductRequest) request);
+            else
+                productService.updateProduct(productToUpdate.productId(), (UpdateProductRequest) request);
 
             close();
         } catch (Exception e) {
             DialogUtil.showError("Error", e.getMessage());
+        }
+    }
+
+    private boolean validateInputs() {
+        if (categoryBox.getValue() == null) {
+            DialogUtil.showError("Validation", "Category is required");
+            return false;
+        }
+        if (nameField.getText().isBlank()) {
+            DialogUtil.showError("Validation", "Product name is required");
+            return false;
+        }
+        return true;
+    }
+
+    private Object buildRequest() {
+        String name = nameField.getText();
+        int stock = Integer.parseInt(stockField.getText());
+        double price = FormatUtil.currency(priceField.getText());
+        String desc = descField.getText();
+        UUID categoryId = categoryBox.getValue().categoryId();
+
+        if (productToUpdate == null) {
+            return new CreateProductRequest(name, desc, price, stock, categoryId);
+        } else {
+            return new UpdateProductRequest(name, desc, price, categoryId, stock);
         }
     }
 
