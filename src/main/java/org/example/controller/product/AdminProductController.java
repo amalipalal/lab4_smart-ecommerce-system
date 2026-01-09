@@ -21,15 +21,24 @@ import java.util.UUID;
 
 public class AdminProductController {
 
-    public TableView<ProductResponse> productTable;
-    public TableColumn<ProductResponse, String> idColumn;
-    public TableColumn<ProductResponse, String> nameColumn;
-    public TableColumn<ProductResponse, String> descColumn;
-    public TableColumn<ProductResponse, String> priceColumn;
-    public TableColumn<ProductResponse, String> stockColumn;
-    public TableColumn<ProductResponse, String> createdAtColumn;
-    public TableColumn<ProductResponse, Void> actionsColumn;
+    @FXML
+    private TableView<ProductResponse> productTable;
+    @FXML
+    private TableColumn<ProductResponse, String> idColumn;
+    @FXML
+    private TableColumn<ProductResponse, String> nameColumn;
+    @FXML
+    private TableColumn<ProductResponse, String> descColumn;
+    @FXML
+    private TableColumn<ProductResponse, String> priceColumn;
+    @FXML
+    private TableColumn<ProductResponse, String> stockColumn;
+    @FXML
     private TableColumn<ProductResponse, String> categoryColumn;
+    @FXML
+    private TableColumn<ProductResponse, String> createdAtColumn;
+    @FXML
+    private TableColumn<ProductResponse, Void> actionsColumn;
 
     public Button addProductBtn;
     public TextField searchField;
@@ -49,6 +58,8 @@ public class AdminProductController {
     public void initialize() {
         setupColumns();
         setupActionsColumn();
+
+        loadProducts(20,0);
     }
 
     private void setupColumns() {
