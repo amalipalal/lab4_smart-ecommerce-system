@@ -72,8 +72,7 @@
 
         <Label text="Products"
                style="
-                   -fx-margin:
-                   -fx-font-size: 18px;
+                   -fx-font-size: 14px;
                    -fx-font-weight: bold;
                "/>
         <!-- Table -->
