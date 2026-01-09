@@ -111,7 +111,7 @@ public class AdminProductController {
 
     private void openProductModal(String title, ProductResponse product) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/product-modal.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/admin-product-modal.fxml"));
 
             ProductModalController controller = new ProductModalController(this.productService, this.categoryService);
 
