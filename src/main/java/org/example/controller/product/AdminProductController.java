@@ -179,6 +179,13 @@ public class AdminProductController {
         }
     }
 
+    @FXML
+    protected  void handleSearchAction() {
+        currentSearchQuery = searchField.getText().trim();
+        pagination.setCurrentPageIndex(0);
+        setupPagination();
+    }
+
     private void refreshPagination() {
         setupPagination();
     }
