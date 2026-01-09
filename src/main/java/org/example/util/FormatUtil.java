@@ -34,4 +34,16 @@ public class FormatUtil {
         if(amount == null) return "NA";
         return String.format("GHS%,.2f", amount);
     }
+
+    public static double currency(String amount) {
+        if (amount == null || amount.equals("NA")) return 0.0;
+
+        try {
+            String numericPart = amount.replace("GHS", "").replace(",", "").trim();
+            return Double.parseDouble(numericPart);
+        } catch (NumberFormatException e) {
+            return 0.0;
+        }
+
+    }
 }
