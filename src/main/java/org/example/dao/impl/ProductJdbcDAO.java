@@ -26,6 +26,10 @@ public class ProductJdbcDAO implements ProductDAO {
             LIMIT ? OFFSET ?
             """;
 
+    private static final String COUNT_ALL = """
+            SELECT COUNT(*) FROM product
+            """;
+
     private static final String FIND_BY_CATEGORY = """
             SELECT * FROM product
             WHERE category_id = ?
@@ -37,6 +41,11 @@ public class ProductJdbcDAO implements ProductDAO {
             WHERE LOWER(name) LIKE LOWER(?)
             ORDER BY name ASC
             LIMIT ? OFFSET ?
+            """;
+
+    private static final String COUNT_BY_NAME = """
+            SELECT COUNT(*) product
+            WHERE LOWER(name) LIKE LOWER(?)
             """;
 
     private static final String SAVE = """
@@ -135,6 +144,25 @@ public class ProductJdbcDAO implements ProductDAO {
     }
 
     @Override
+    public int countAll() throws DAOException {
+        try(Connection conn = DBConnection.getConnection()){
+            PreparedStatement statement = conn.prepareStatement(COUNT_ALL);
+            try(ResultSet rs = statement.executeQuery()){
+                if(rs.next()) {
+                    long rowCount = rs.getLong(1);
+                    if(rowCount > Integer.MAX_VALUE)
+                        throw new DAOException("Product count exceeds integer range:" + rowCount, null);
+                    return (int) rowCount;
+                } else {
+                    return 0;
+                }
+            }
+        } catch (SQLException | DatabaseConnectionException e) {
+            throw new DAOException("Failed to get product count", e);
+        }
+    }
+
+    @Override
     public List<Product> findByCategory(UUID categoryId, int limit, int offset) throws DAOException {
         try {
             return queryList(FIND_BY_CATEGORY, ps -> {
@@ -157,6 +185,27 @@ public class ProductJdbcDAO implements ProductDAO {
             });
         } catch (SQLException | DatabaseConnectionException e) {
             throw new DAOException("Failed to retrieve products with name" + query, e);
+        }
+    }
+
+    @Override
+    public int countByName(String query) throws DAOException {
+        try(Connection conn = DBConnection.getConnection()){
+            PreparedStatement ps = conn.prepareStatement(COUNT_BY_NAME);
+            ps.setString(1, query);
+
+            try(ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    long rowCount = rs.getLong(1);
+                    if(rowCount > Integer.MAX_VALUE)
+                        throw new DAOException("Product count exceeds integer range:" + rowCount, null);
+                    return (int) rowCount;
+                } else {
+                    return 0;
+                }
+            }
+        } catch (SQLException | DatabaseConnectionException e) {
+            throw new DAOException("Failed to count products by name", e);
         }
     }
 
