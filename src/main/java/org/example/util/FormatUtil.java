@@ -29,4 +29,9 @@ public class FormatUtil {
                 ? value
                 : value.substring(0, max) + "...";
     }
+
+    public static String currency(Double amount) {
+        if(amount == null) return "NA";
+        return String.format("GHS%,.2f", amount);
+    }
 }
