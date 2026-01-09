@@ -105,6 +105,9 @@ public class AdminProductController {
                 icon.setIconSize(14);
                 editBtn.setGraphic(icon);
                 editBtn.getStyleClass().add("icon-btn");
+                editBtn.setOnAction( e -> {
+                    handleUpdateProduct(getTableView().getItems().get(getIndex()));
+                });
             }
 
             @Override
@@ -113,6 +116,10 @@ public class AdminProductController {
                 setGraphic(empty ? null : container);
             }
         });
+    }
+
+    protected  void handleUpdateProduct(ProductResponse product) {
+        openProductModal("Update product", product);
     }
 
     private void setupPagination() {

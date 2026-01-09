@@ -1,24 +1,34 @@
 package org.example.controller.product;
 
 import javafx.collections.FXCollections;
+import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.example.dto.category.CategoryResponse;
 import org.example.dto.product.CreateProductRequest;
 import org.example.dto.product.ProductResponse;
+import org.example.dto.product.UpdateProductRequest;
 import org.example.service.CategoryService;
 import org.example.service.ProductService;
 import org.example.util.DialogUtil;
 import org.example.util.FormatUtil;
 
+import java.util.UUID;
+
 public class ProductModalController {
 
-    public ComboBox<CategoryResponse> categoryBox;
-    public TextField nameField;
-    public TextField stockField;
-    public TextField priceField;
-    public TextArea descField;
-    public Button saveBtn;
+    @FXML
+    private ComboBox<CategoryResponse> categoryBox;
+    @FXML
+    private TextField nameField;
+    @FXML
+    private TextField stockField;
+    @FXML
+    private TextField priceField;
+    @FXML
+    private TextArea descField;
+    @FXML
+    private Button saveBtn;
 
     private final ProductService productService;
     private final CategoryService categoryService;
@@ -29,7 +39,8 @@ public class ProductModalController {
         this.categoryService = categoryService;
     }
 
-    public void initialize() {
+    @FXML
+    protected void initialize() {
         loadCategories();
     }
 
@@ -73,40 +84,47 @@ public class ProductModalController {
         saveBtn.setText("Update product");
     }
 
-    public void handleSave() {
+    @FXML
+    protected void handleSave() {
         try {
-            CategoryResponse selectedCategory = categoryBox.getValue();
+            if(!validateInputs()) return;
 
-            if(selectedCategory == null) {
-                DialogUtil.showError("Validation", "Category is required");
-                return;
-            }
+            var request = buildRequest();
 
-            String name = nameField.getText();
-            int stock = Integer.parseInt(stockField.getText());
-            double price = Double.parseDouble(priceField.getText());
-            String desc = descField.getText();
-
-            if(name.isBlank()) {
-                DialogUtil.showError("Validation", "Product name is required");
-                return;
-            }
-
-            if (productToUpdate == null) {
-                productService.createProduct(
-                        new CreateProductRequest(
-                                name,
-                                desc,
-                                price,
-                                stock,
-                                selectedCategory.categoryId()
-                        )
-                );
-            }
+            if(productToUpdate == null)
+                productService.createProduct((CreateProductRequest) request);
+            else
+                productService.updateProduct(productToUpdate.productId(), (UpdateProductRequest) request);
 
             close();
         } catch (Exception e) {
             DialogUtil.showError("Error", e.getMessage());
+        }
+    }
+
+    private boolean validateInputs() {
+        if (categoryBox.getValue() == null) {
+            DialogUtil.showError("Validation", "Category is required");
+            return false;
+        }
+        if (nameField.getText().isBlank()) {
+            DialogUtil.showError("Validation", "Product name is required");
+            return false;
+        }
+        return true;
+    }
+
+    private Object buildRequest() {
+        String name = nameField.getText();
+        int stock = Integer.parseInt(stockField.getText());
+        double price = FormatUtil.currency(priceField.getText());
+        String desc = descField.getText();
+        UUID categoryId = categoryBox.getValue().categoryId();
+
+        if (productToUpdate == null) {
+            return new CreateProductRequest(name, desc, price, stock, categoryId);
+        } else {
+            return new UpdateProductRequest(name, desc, price, categoryId, stock);
         }
     }
 
