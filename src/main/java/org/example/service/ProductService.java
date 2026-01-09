@@ -42,6 +42,14 @@ public class ProductService {
         }
     }
 
+    public int getProductCount() {
+        try {
+            return this.productDAO.countAll();
+        } catch (DAOException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
     public ProductResponse getProduct(UUID productId) {
         try {
             var product = this.productDAO.findById(productId)
@@ -50,6 +58,14 @@ public class ProductService {
             return new ProductResponse(product);
         } catch (DAOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public int countProductsByName(String query) {
+        try {
+            return this.productDAO.countByName(query);
+        } catch (DAOException e) {
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
