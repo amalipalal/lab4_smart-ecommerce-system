@@ -70,6 +70,14 @@ public class ProductService {
         }
     }
 
+    public int countProductsByFilter(ProductFilter filter) {
+        try {
+            return this.productDAO.countFiltered(filter);
+        } catch (DAOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void deleteProduct(UUID productId) {
         try {
             this.productDAO.deleteById(productId);
