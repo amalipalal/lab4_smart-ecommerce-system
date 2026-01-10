@@ -40,6 +40,7 @@ public class BuyerViewController {
     private final ProductService productService;
     private final CategoryService categoryService;
     private final ObservableList<ProductResponse> products = FXCollections.observableArrayList();
+    private ObservableList<CategoryResponse> categories = FXCollections.observableArrayList();
 
     private final int PAGE_SIZE = 5;
     private String currentSearchQuery = "";
@@ -53,6 +54,7 @@ public class BuyerViewController {
     private void initialize() {
         setupColumns();
         setupActionsColumn();
+        setupCategoryFilter();
         setupPagination();
     }
 
@@ -89,6 +91,42 @@ public class BuyerViewController {
                         )
                 )
         ));
+    }
+
+    private void setupCategoryFilter() {
+        try {
+            categories.add(null);
+            categories.addAll(categoryService.getAllCategories(100,0));
+
+            categoryFilter.setItems(categories);
+
+            setCategoryCellFactory();
+
+            categoryFilter.setButtonCell(categoryFilter.getCellFactory().call(null));
+
+            setCategoryListener();
+        } catch (Exception e) {
+            DialogUtil.showError("Error", "Failed to load categories");
+        }
+    }
+
+    private void setCategoryCellFactory() {
+        categoryFilter.setCellFactory(cb -> new ListCell<>() {
+            @Override
+            protected void updateItem(CategoryResponse item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty
+                        ? ""
+                        : item == null ? "All Categories" : item.name());
+            }
+        });
+    }
+
+    private void setCategoryListener() {
+        categoryFilter.valueProperty().addListener((obs, oldVal, newVal) -> {
+            pagination.setCurrentPageIndex(0);
+            setupPagination();
+        });
     }
 
     private void setupPagination() {
