@@ -1,6 +1,6 @@
 package org.example.service;
 
-import org.example.dao.CategoryDAO;
+import org.example.dao.interfaces.CategoryDAO;
 import org.example.dao.exception.DAOException;
 import org.example.dto.category.CreateCategoryRequest;
 import org.example.dto.category.CategoryResponse;

@@ -1,12 +1,13 @@
 package org.example.dao.impl;
 
-import org.example.dao.ProductDAO;
-import org.example.dao.StatementPreparer;
+import org.example.dao.interfaces.ProductDAO;
+import org.example.dao.interfaces.StatementPreparer;
 import org.example.dao.exception.DAOException;
 import org.example.dao.exception.InsufficientStockException;
 import org.example.model.Product;
 import org.example.model.ProductFilter;
-import org.example.util.DBConnection;
+import org.example.util.data.DBConnection;
+import org.example.util.data.SqlAndParams;
 import org.example.util.exception.DatabaseConnectionException;
 
 import java.sql.*;
@@ -379,5 +380,3 @@ public class ProductJdbcDAO implements ProductDAO {
         }
     }
 }
-
-record SqlAndParams(String sql, List<Object> params) {}

@@ -15,8 +15,8 @@ import org.example.service.CategoryService;
 import org.example.service.ProductService;
 import org.example.ui.ActionCell;
 import org.example.ui.ActionDefinition;
-import org.example.util.DialogUtil;
-import org.example.util.FormatUtil;
+import org.example.util.ui.DialogUtil;
+import org.example.util.ui.FormatUtil;
 
 import java.util.List;
 import java.util.UUID;

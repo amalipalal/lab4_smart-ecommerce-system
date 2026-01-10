@@ -1,10 +1,10 @@
 package org.example.dao.impl;
 
-import org.example.dao.OrdersDAO;
-import org.example.dao.StatementPreparer;
+import org.example.dao.interfaces.OrdersDAO;
+import org.example.dao.interfaces.StatementPreparer;
 import org.example.dao.exception.DAOException;
 import org.example.model.Orders;
-import org.example.util.DBConnection;
+import org.example.util.data.DBConnection;
 import org.example.util.exception.DatabaseConnectionException;
 
 import java.sql.*;
