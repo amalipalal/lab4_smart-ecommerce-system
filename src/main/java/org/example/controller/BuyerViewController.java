@@ -7,6 +7,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import org.example.dto.category.CategoryResponse;
 import org.example.dto.product.ProductResponse;
+import org.example.model.ProductFilter;
 import org.example.service.CategoryService;
 import org.example.service.ProductService;
 import org.example.ui.ActionCell;
@@ -40,9 +41,9 @@ public class BuyerViewController {
     private final ProductService productService;
     private final CategoryService categoryService;
     private final ObservableList<ProductResponse> products = FXCollections.observableArrayList();
+    private ObservableList<CategoryResponse> categories = FXCollections.observableArrayList();
 
     private final int PAGE_SIZE = 5;
-    private String currentSearchQuery = "";
 
     public BuyerViewController(ProductService productService, CategoryService categoryService) {
         this.productService = productService;
@@ -53,6 +54,7 @@ public class BuyerViewController {
     private void initialize() {
         setupColumns();
         setupActionsColumn();
+        setupCategoryFilter();
         setupPagination();
     }
 
@@ -91,34 +93,76 @@ public class BuyerViewController {
         ));
     }
 
-    private void setupPagination() {
-        int totalItems = this.currentSearchQuery.isBlank()
-                ? productService.getProductCount()
-                : productService.countProductsByName(currentSearchQuery);
+    private void setupCategoryFilter() {
+        try {
+            categories.add(null);
+            categories.addAll(categoryService.getAllCategories(100,0));
 
+            categoryFilter.setItems(categories);
+
+            setCategoryCellFactory();
+
+            categoryFilter.setButtonCell(categoryFilter.getCellFactory().call(null));
+
+            setCategoryListener();
+        } catch (Exception e) {
+            DialogUtil.showError("Error", "Failed to load categories");
+        }
+    }
+
+    private void setCategoryCellFactory() {
+        categoryFilter.setCellFactory(cb -> new ListCell<>() {
+            @Override
+            protected void updateItem(CategoryResponse item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty
+                        ? ""
+                        : item == null ? "All Categories" : item.name());
+            }
+        });
+    }
+
+    private void setCategoryListener() {
+        categoryFilter.valueProperty().addListener((obs, oldVal, newVal) -> {
+            pagination.setCurrentPageIndex(0);
+            setupPagination();
+        });
+    }
+
+    private void setupPagination() {
+        ProductFilter filter = buildFilter();
+
+        int totalItems = this.productService.countProductsByFilter(filter);
         int totalPages = (int) Math.ceil((double) totalItems / PAGE_SIZE);
 
         pagination.setPageCount(Math.max(totalPages, 1));
         pagination.setCurrentPageIndex(0);
 
-        loadProducts(PAGE_SIZE, 0);
+        loadProducts(filter, 0);
 
         // Listen for page changes
         pagination.currentPageIndexProperty().addListener(
                 (obs, oldIndex, newIndex) -> {
-                    loadProducts(PAGE_SIZE, newIndex.intValue() * PAGE_SIZE);
+                    loadProducts(filter, newIndex.intValue() * PAGE_SIZE);
                 }
         );
     }
 
-    private void loadProducts(int limit, int offset) {
+    private ProductFilter buildFilter() {
+        String search = searchField.getText().trim();
+        CategoryResponse selectedCategory = categoryFilter.getValue();
+
+        return new ProductFilter(
+                search.isBlank() ? null : search,
+                selectedCategory == null ? null : selectedCategory.categoryId()
+        );
+    }
+
+    private void loadProducts(ProductFilter filter, int offset) {
         try{
             products.clear();
 
-            List<ProductResponse> result =
-                    currentSearchQuery.isBlank()
-                            ? productService.getAllProducts(limit, offset)
-                            : productService.searchProducts(currentSearchQuery, limit, offset);
+            List<ProductResponse> result = this.productService.searchProducts(filter, PAGE_SIZE, offset);
 
             products.addAll(result);
             productTable.setItems(products);
@@ -129,7 +173,6 @@ public class BuyerViewController {
 
     @FXML
     private void handleSearchAction() {
-        currentSearchQuery = searchField.getText().trim();
         pagination.setCurrentPageIndex(0);
         setupPagination();
     }
