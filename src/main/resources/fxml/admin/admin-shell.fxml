@@ -81,6 +81,28 @@
                 </graphic>
             </Button>
 
+            <Pane VBox.vgrow="ALWAYS"/>
+
+            <!-- Buyer View Button -->
+            <Button text="Buyer View"
+                    onAction="#goBuyer"
+                    maxWidth="Infinity"
+                    style="
+                    -fx-background-color: #111827;
+                    -fx-text-fill: #e5e7eb;
+                    -fx-font-size: 13px;
+                    -fx-alignment: CENTER_LEFT;
+                    -fx-padding: 10 12;
+                    -fx-background-radius: 8;
+                    -fx-cursor: hand;
+                ">
+                <graphic>
+                    <FontIcon iconLiteral="fas-store"
+                              iconSize="14"
+                              iconColor="#e5e7eb"/>
+                </graphic>
+            </Button>
+
         </VBox>
     </left>
 
