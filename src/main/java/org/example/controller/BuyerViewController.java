@@ -1,12 +1,136 @@
 package org.example.controller;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.*;
+import org.example.dto.category.CategoryResponse;
+import org.example.dto.product.ProductResponse;
+import org.example.service.CategoryService;
+import org.example.service.ProductService;
+import org.example.ui.ActionCell;
+import org.example.ui.ActionDefinition;
 import org.example.ui.Router;
+import org.example.util.DialogUtil;
+import org.example.util.FormatUtil;
+
+import java.util.List;
 
 public class BuyerViewController {
 
     @FXML
+    private TextField searchField;
+    @FXML
+    private ComboBox<CategoryResponse> categoryFilter;
+    @FXML
+    private TableView<ProductResponse> productTable;
+    @FXML
+    private TableColumn<ProductResponse, String> nameColumn;
+    @FXML
+    private TableColumn<ProductResponse, String> descColumn;
+    @FXML
+    private TableColumn<ProductResponse, String> priceColumn;
+    @FXML
+    private TableColumn<ProductResponse, Void> actionsColumn;
+
+    @FXML
+    private Pagination pagination;
+
+    private final ProductService productService;
+    private final CategoryService categoryService;
+    private final ObservableList<ProductResponse> products = FXCollections.observableArrayList();
+
+    private final int PAGE_SIZE = 5;
+    private String currentSearchQuery = "";
+
+    public BuyerViewController(ProductService productService, CategoryService categoryService) {
+        this.productService = productService;
+        this.categoryService = categoryService;
+    }
+
+    @FXML
+    private void initialize() {
+        setupColumns();
+        setupActionsColumn();
+        setupPagination();
+    }
+
+    @FXML
     private void goAdminView() {
         Router.goToAdminShell();
+    }
+
+    private void setupColumns() {
+        nameColumn.setCellValueFactory(c ->
+                new SimpleStringProperty(c.getValue().name()));
+
+        descColumn.setCellValueFactory(c ->
+                new SimpleStringProperty(c.getValue().description()));
+
+        priceColumn.setCellValueFactory(c ->
+                new SimpleStringProperty(FormatUtil.currency(c.getValue().price())));
+    }
+
+    private void setupActionsColumn() {
+        actionsColumn.setCellFactory(col -> new ActionCell<>(
+                List.of(
+                        new ActionDefinition<>(
+                                "fas-shopping-cart",
+                                14,
+                                "icon-btn",
+                                null
+                        ),
+                        new ActionDefinition<>(
+                                "fas-comments",
+                                14,
+                                "icon-btn",
+                                null
+                        )
+                )
+        ));
+    }
+
+    private void setupPagination() {
+        int totalItems = this.currentSearchQuery.isBlank()
+                ? productService.getProductCount()
+                : productService.countProductsByName(currentSearchQuery);
+
+        int totalPages = (int) Math.ceil((double) totalItems / PAGE_SIZE);
+
+        pagination.setPageCount(Math.max(totalPages, 1));
+        pagination.setCurrentPageIndex(0);
+
+        loadProducts(PAGE_SIZE, 0);
+
+        // Listen for page changes
+        pagination.currentPageIndexProperty().addListener(
+                (obs, oldIndex, newIndex) -> {
+                    loadProducts(PAGE_SIZE, newIndex.intValue() * PAGE_SIZE);
+                }
+        );
+    }
+
+    private void loadProducts(int limit, int offset) {
+        try{
+            products.clear();
+
+            List<ProductResponse> result =
+                    currentSearchQuery.isBlank()
+                            ? productService.getAllProducts(limit, offset)
+                            : productService.searchProducts(currentSearchQuery, limit, offset);
+
+            products.addAll(result);
+            productTable.setItems(products);
+        } catch (Exception e) {
+            DialogUtil.showError("Error", "Failed to load products");
+        }
+    }
+
+    @FXML
+    private void handleSearchAction() {
+        currentSearchQuery = searchField.getText().trim();
+        pagination.setCurrentPageIndex(0);
+        setupPagination();
     }
 }
