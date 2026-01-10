@@ -7,6 +7,7 @@ import org.example.dto.product.CreateProductResponse;
 import org.example.dto.product.ProductResponse;
 import org.example.dto.product.UpdateProductRequest;
 import org.example.model.Product;
+import org.example.model.ProductFilter;
 import org.example.service.exception.ProductNotFoundException;
 
 import java.time.Instant;
@@ -89,6 +90,15 @@ public class ProductService {
     public List<ProductResponse> searchProducts(String query, int limit, int offset) {
         try {
             List<Product> products = this.productDAO.searchByName(query, limit, offset);
+            return products.stream().map(ProductResponse::new).toList();
+        } catch (DAOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<ProductResponse> searchProducts(ProductFilter filter, int limit, int offset) {
+        try {
+            List<Product> products = this.productDAO.findFiltered(filter, limit, offset);
             return products.stream().map(ProductResponse::new).toList();
         } catch (DAOException e) {
             throw new RuntimeException(e);
