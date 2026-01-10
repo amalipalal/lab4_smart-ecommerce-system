@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21.0.2"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.controller.BuyerViewController"
+            style="
+                -fx-background-color: #f5f7fa;
+                -fx-font-family: 'Segoe UI', sans-serif;
+            ">
+
+    <center>
+        <VBox spacing="20"
+              alignment="CENTER"
+              style="-fx-padding: 40;">
+
+            <Label text="Buyer View"
+                   style="
+                       -fx-font-size: 24px;
+                       -fx-font-weight: bold;
+                   "/>
+
+            <Label text="This is a test page to verify routing works."
+                   style="-fx-text-fill: #6b7280;"/>
+
+            <Button text="Back to Admin"
+                    onAction="#goAdminView"
+                    style="
+                        -fx-background-color: #1f2933;
+                        -fx-text-fill: white;
+                        -fx-padding: 10 20;
+                        -fx-background-radius: 8;
+                        -fx-cursor: hand;
+                    "/>
+
+        </VBox>
+    </center>
+
+</BorderPane>

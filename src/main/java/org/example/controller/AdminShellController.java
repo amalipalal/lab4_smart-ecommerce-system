@@ -12,26 +12,26 @@ public class AdminShellController {
     @FXML
     public void initialize() {
         contentArea.getChildren().setAll(
-                Router.goToAdmin("admin-product.fxml")
+                Router.loadAdminContent("admin-product.fxml")
         );
     }
 
     @FXML
     private void goProducts() {
         contentArea.getChildren().setAll(
-                Router.goToAdmin("admin-product.fxml")
+                Router.loadAdminContent("admin-product.fxml")
         );
     }
 
     @FXML
     private void goCategories() {
         contentArea.getChildren().setAll(
-                Router.goToAdmin("admin-category.fxml")
+                Router.loadAdminContent("admin-category.fxml")
         );
     }
 
     @FXML
     private void goBuyer() {
-        Router.goToBuyer("buyer-home.fxml");
+        Router.goToBuyer();
     }
 }
