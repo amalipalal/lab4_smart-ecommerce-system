@@ -41,7 +41,7 @@ public class BuyerShellController {
     private final ProductService productService;
     private final CategoryService categoryService;
     private final ObservableList<ProductResponse> products = FXCollections.observableArrayList();
-    private ObservableList<CategoryResponse> categories = FXCollections.observableArrayList();
+    private final ObservableList<CategoryResponse> categories = FXCollections.observableArrayList();
 
     private final int PAGE_SIZE = 5;
 
