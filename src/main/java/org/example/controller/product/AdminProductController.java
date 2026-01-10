@@ -10,6 +10,7 @@ import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.example.dto.product.ProductResponse;
+import org.example.model.ProductFilter;
 import org.example.service.CategoryService;
 import org.example.service.ProductService;
 import org.example.ui.ActionCell;
@@ -54,7 +55,6 @@ public class AdminProductController {
     private final ObservableList<ProductResponse> products = FXCollections.observableArrayList();
 
     private final int PAGE_SIZE = 5;
-    private String currentSearchQuery = "";
 
     public AdminProductController(ProductService productService, CategoryService categoryService) {
         this.productService = productService;
@@ -133,33 +133,38 @@ public class AdminProductController {
     }
 
     private void setupPagination() {
-        int totalItems = this.currentSearchQuery.isBlank()
-                ? productService.getProductCount()
-                : productService.countProductsByName(currentSearchQuery);
+        ProductFilter filter = buildFilter();
 
+        int totalItems = this.productService.countProductsByFilter(filter);
         int totalPages = (int) Math.ceil((double) totalItems / PAGE_SIZE);
 
         pagination.setPageCount(Math.max(totalPages, 1));
         pagination.setCurrentPageIndex(0);
 
-        loadProducts(PAGE_SIZE, 0);
+        loadProducts(filter, 0);
 
         // Listen for page changes
         pagination.currentPageIndexProperty().addListener(
                 (obs, oldIndex, newIndex) -> {
-                    loadProducts(PAGE_SIZE, newIndex.intValue() * PAGE_SIZE);
+                    loadProducts(filter, newIndex.intValue() * PAGE_SIZE);
                 }
         );
     }
 
-    private void loadProducts(int limit, int offset) {
+    private ProductFilter buildFilter() {
+        String search = searchField.getText().trim();
+
+        return new ProductFilter(
+                search.isBlank() ? null : search,
+                null
+        );
+    }
+
+    private void loadProducts(ProductFilter filter, int offset) {
         try {
             products.clear();
 
-            List<ProductResponse> result =
-                    currentSearchQuery.isBlank()
-                            ? productService.getAllProducts(limit, offset)
-                            : productService.searchProducts(currentSearchQuery, limit, offset);
+            List<ProductResponse> result = this.productService.searchProducts(filter, PAGE_SIZE, offset);
 
             products.addAll(result);
             productTable.setItems(products);
@@ -198,7 +203,6 @@ public class AdminProductController {
 
     @FXML
     protected  void handleSearchAction() {
-        currentSearchQuery = searchField.getText().trim();
         pagination.setCurrentPageIndex(0);
         setupPagination();
     }
