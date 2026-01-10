@@ -1,7 +1,7 @@
 package org.example;
 
-import org.example.dao.CategoryDAO;
-import org.example.dao.ProductDAO;
+import org.example.dao.interfaces.CategoryDAO;
+import org.example.dao.interfaces.ProductDAO;
 import org.example.dao.impl.CategoryJdbcDAO;
 import org.example.dao.impl.ProductJdbcDAO;
 import org.example.service.CategoryService;

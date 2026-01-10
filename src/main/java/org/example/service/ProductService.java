@@ -1,6 +1,6 @@
 package org.example.service;
 
-import org.example.dao.ProductDAO;
+import org.example.dao.interfaces.ProductDAO;
 import org.example.dao.exception.DAOException;
 import org.example.dto.product.CreateProductRequest;
 import org.example.dto.product.CreateProductResponse;
@@ -63,14 +63,6 @@ public class ProductService {
         }
     }
 
-    public int countProductsByName(String query) {
-        try {
-            return this.productDAO.countByName(query);
-        } catch (DAOException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-    }
-
     public int countProductsByFilter(ProductFilter filter) {
         try {
             return this.productDAO.countFiltered(filter);
@@ -82,15 +74,6 @@ public class ProductService {
     public void deleteProduct(UUID productId) {
         try {
             this.productDAO.deleteById(productId);
-        } catch (DAOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public List<ProductResponse> searchProducts(String query, int limit, int offset) {
-        try {
-            List<Product> products = this.productDAO.searchByName(query, limit, offset);
-            return products.stream().map(ProductResponse::new).toList();
         } catch (DAOException e) {
             throw new RuntimeException(e);
         }

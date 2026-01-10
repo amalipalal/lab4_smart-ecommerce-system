@@ -6,7 +6,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/21.0.2"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="org.example.controller.BuyerViewController"
+            fx:controller="org.example.controller.shell.BuyerShellController"
             style="
                 -fx-font-family: 'Inter', 'Segoe UI', sans-serif;
                 -fx-background-color: #f5f7fa;

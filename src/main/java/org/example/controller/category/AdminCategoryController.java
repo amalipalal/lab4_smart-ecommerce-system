@@ -11,8 +11,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.example.dto.category.CategoryResponse;
 import org.example.service.CategoryService;
-import org.example.util.DialogUtil;
-import org.example.util.FormatUtil;
+import org.example.util.ui.DialogUtil;
+import org.example.util.ui.FormatUtil;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.List;

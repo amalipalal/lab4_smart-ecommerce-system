@@ -1,4 +1,4 @@
-import org.example.dao.ProductDAO;
+import org.example.dao.interfaces.ProductDAO;
 import org.example.dao.exception.DAOException;
 import org.example.dto.product.CreateProductRequest;
 import org.example.model.Product;

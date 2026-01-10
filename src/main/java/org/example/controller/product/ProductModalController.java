@@ -10,8 +10,8 @@ import org.example.dto.product.ProductResponse;
 import org.example.dto.product.UpdateProductRequest;
 import org.example.service.CategoryService;
 import org.example.service.ProductService;
-import org.example.util.DialogUtil;
-import org.example.util.FormatUtil;
+import org.example.util.ui.DialogUtil;
+import org.example.util.ui.FormatUtil;
 
 import java.util.UUID;
 

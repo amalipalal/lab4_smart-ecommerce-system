@@ -1,4 +1,4 @@
-package org.example.controller;
+package org.example.controller.shell;
 
 import javafx.fxml.FXML;
 import javafx.scene.layout.StackPane;

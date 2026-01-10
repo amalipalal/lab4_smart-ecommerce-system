@@ -1,4 +1,4 @@
-package org.example.controller;
+package org.example.controller.shell;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -13,12 +13,12 @@ import org.example.service.ProductService;
 import org.example.ui.ActionCell;
 import org.example.ui.ActionDefinition;
 import org.example.ui.Router;
-import org.example.util.DialogUtil;
-import org.example.util.FormatUtil;
+import org.example.util.ui.DialogUtil;
+import org.example.util.ui.FormatUtil;
 
 import java.util.List;
 
-public class BuyerViewController {
+public class BuyerShellController {
 
     @FXML
     private TextField searchField;
@@ -41,11 +41,11 @@ public class BuyerViewController {
     private final ProductService productService;
     private final CategoryService categoryService;
     private final ObservableList<ProductResponse> products = FXCollections.observableArrayList();
-    private ObservableList<CategoryResponse> categories = FXCollections.observableArrayList();
+    private final ObservableList<CategoryResponse> categories = FXCollections.observableArrayList();
 
     private final int PAGE_SIZE = 5;
 
-    public BuyerViewController(ProductService productService, CategoryService categoryService) {
+    public BuyerShellController(ProductService productService, CategoryService categoryService) {
         this.productService = productService;
         this.categoryService = categoryService;
     }

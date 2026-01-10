@@ -1,4 +1,4 @@
-import org.example.dao.ProductDAO;
+import org.example.dao.interfaces.ProductDAO;
 import org.example.dao.exception.DAOException;
 import org.example.service.InventoryService;
 import org.junit.jupiter.api.DisplayName;
