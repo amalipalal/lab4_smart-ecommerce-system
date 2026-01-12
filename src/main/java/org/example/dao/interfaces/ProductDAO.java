@@ -4,6 +4,7 @@ import org.example.dao.exception.DAOException;
 import org.example.model.Product;
 import org.example.model.ProductFilter;
 
+import java.sql.Connection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -11,6 +12,8 @@ import java.util.UUID;
 public interface ProductDAO {
 
     Optional<Product> findById(UUID productId) throws DAOException;
+
+    Optional<Product> findById(Connection connection, UUID productId) throws DAOException;
 
     List<Product> findAll(int limit, int offset) throws DAOException;
 
@@ -30,9 +33,9 @@ public interface ProductDAO {
 
     void update(Product product) throws DAOException;
 
-    void reduceStock(UUID productId, int quantity) throws DAOException;
+    void reduceStock(Connection connection, UUID productId, int quantity) throws DAOException;
 
-    void increaseStock(UUID productId, int quantity) throws DAOException;
+    void increaseStock(Connection connection, UUID productId, int quantity) throws DAOException;
 
     void deleteById(UUID productId) throws DAOException;
 }
