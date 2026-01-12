@@ -86,30 +86,19 @@ public class OrderJdbcDAO implements OrdersDAO {
     }
 
     @Override
-    public void save(Orders order) throws DAOException {
-        try {
-            insertionQuery(SAVE, ps -> {
-                ps.setObject(1, order.getOrderId());
-                ps.setObject(2, order.getCustomerId());
-                ps.setTimestamp(3, Timestamp.from(order.getOrderDate()));
-                ps.setDouble(4, order.getTotalAmount());
-                ps.setString(5, order.getShippingCountry());
-                ps.setString(6, order.getShippingCity());
-                ps.setString(7, order.getShippingPostalCode());
-            });
-        } catch (SQLException | DatabaseConnectionException e) {
-            throw new DAOException("Failed to save order " + order.getOrderId(), e);
-        }
-    }
+    public void save(Connection conn, Orders order) throws DAOException {
+        try(PreparedStatement ps = conn.prepareStatement(SAVE)) {
+            ps.setObject(1, order.getOrderId());
+            ps.setObject(2, order.getCustomerId());
+            ps.setTimestamp(3, Timestamp.from(order.getOrderDate()));
+            ps.setDouble(4, order.getTotalAmount());
+            ps.setString(5, order.getShippingCountry());
+            ps.setString(6, order.getShippingCity());
+            ps.setString(7, order.getShippingPostalCode());
 
-    private void insertionQuery(String sql, StatementPreparer preparer)
-            throws SQLException, DatabaseConnectionException {
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            preparer.prepare(ps);
             ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new DAOException("Failed to save order " + order.getOrderId(), e);
         }
     }
 }

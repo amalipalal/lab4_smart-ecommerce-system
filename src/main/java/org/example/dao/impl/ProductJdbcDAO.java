@@ -109,6 +109,23 @@ public class ProductJdbcDAO implements ProductDAO {
         return Optional.empty();
     }
 
+    @Override
+    public Optional<Product> findById(Connection conn, UUID productId) throws DAOException {
+        try(PreparedStatement preparedStatement = conn.prepareStatement(FIND_BY_ID)) {
+            preparedStatement.setObject(1, productId);
+
+            try(ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next())
+                    return Optional.of(mapRowToProduct(resultSet));
+            } catch (SQLException e) {
+                throw new DAOException("Failed to find product " + productId, e);
+            }
+        } catch (SQLException e) {
+            throw new DAOException("Failed to find product " + productId, e);
+        }
+        return Optional.empty();
+    }
+
     private Product mapRowToProduct(ResultSet resultSet) throws SQLException {
         return new Product(
                 resultSet.getObject("product_id", UUID.class),
@@ -316,9 +333,8 @@ public class ProductJdbcDAO implements ProductDAO {
     }
 
     @Override
-    public void reduceStock(UUID productId, int quantity) throws DAOException {
-        try(Connection conn = DBConnection.getConnection()){
-            PreparedStatement preparedStatement = conn.prepareStatement(REDUCE_STOCK);
+    public void reduceStock(Connection conn, UUID productId, int quantity) throws DAOException {
+        try(PreparedStatement preparedStatement = conn.prepareStatement(REDUCE_STOCK)){
             preparedStatement.setInt(1, quantity);
             preparedStatement.setObject(2, productId);
             preparedStatement.setInt(3, quantity);
@@ -327,15 +343,14 @@ public class ProductJdbcDAO implements ProductDAO {
             if(updateRows == 0)
                 throw new InsufficientStockException(productId.toString());
 
-        } catch (SQLException | DatabaseConnectionException e) {
+        } catch (SQLException e) {
             throw new DAOException("Failed to update stock for product" + productId, e);
         }
     }
 
     @Override
-    public void increaseStock(UUID productId, int quantity) throws DAOException {
-        try(Connection conn = DBConnection.getConnection()){
-            PreparedStatement preparedStatement = conn.prepareStatement(INCREASE_STOCK);
+    public void increaseStock(Connection conn, UUID productId, int quantity) throws DAOException {
+        try(PreparedStatement preparedStatement = conn.prepareStatement(INCREASE_STOCK);){
             preparedStatement.setInt(1, quantity);
             preparedStatement.setObject(2, productId);
             preparedStatement.setInt(3, quantity);
@@ -344,7 +359,7 @@ public class ProductJdbcDAO implements ProductDAO {
             if(updateRows == 0)
                 throw new InsufficientStockException(productId.toString());
 
-        } catch (SQLException | DatabaseConnectionException e) {
+        } catch (SQLException e) {
             throw new DAOException("Failed to increase stock for product" + productId, e);
         }
     }
