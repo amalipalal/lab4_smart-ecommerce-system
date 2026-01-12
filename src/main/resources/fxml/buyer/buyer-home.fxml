@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21.0.2"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.controller.shell.BuyerShellController"
+            style="
+                -fx-font-family: 'Inter', 'Segoe UI', sans-serif;
+                -fx-background-color: #f5f7fa;
+            ">
+
+    <!-- Top Bar -->
+    <top>
+        <HBox spacing="12"
+              alignment="CENTER_LEFT"
+              style="
+                  -fx-padding: 16 24;
+                  -fx-background-color: white;
+                  -fx-border-color: #e5e7eb;
+                  -fx-border-width: 0 0 1 0;
+              ">
+
+            <Label text="Shop"
+                   style="
+                       -fx-font-size: 18px;
+                       -fx-font-weight: bold;
+                   "/>
+
+            <HBox spacing="6"
+                  alignment="CENTER_LEFT"
+                  style="
+                      -fx-background-color: #f9fafb;
+                      -fx-padding: 6 8;
+                      -fx-background-radius: 8;
+                      -fx-border-color: #e5e7eb;
+                      -fx-border-radius: 8;
+                  ">
+                <FontIcon iconLiteral="fas-search"
+                          iconSize="12"
+                          iconColor="#6b7280"/>
+
+                <TextField fx:id="searchField"
+                           onAction="#handleSearchAction"
+                           promptText="Search products..."
+                           style="
+                               -fx-background-color: transparent;
+                               -fx-border-color: transparent;
+                               -fx-font-size: 13px;
+                               -fx-pref-width: 220;
+                           "/>
+            </HBox>
+
+            <ComboBox fx:id="categoryFilter"
+                      promptText="Category"
+                      style="
+                          -fx-background-radius: 8;
+                          -fx-pref-width: 160;
+                      "/>
+
+            <Pane HBox.hgrow="ALWAYS"/>
+
+            <!-- Switch back to admin -->
+            <Button text="Admin"
+                    onAction="#goAdminView"
+                    style="
+                        -fx-background-color: #1f2933;
+                        -fx-text-fill: white;
+                        -fx-padding: 8 14;
+                        -fx-background-radius: 8;
+                        -fx-font-size: 12px;
+                    ">
+                <graphic>
+                    <FontIcon iconLiteral="fas-user-shield"
+                              iconSize="12"
+                              iconColor="white"/>
+                </graphic>
+            </Button>
+        </HBox>
+    </top>
+
+    <!-- Main Content -->
+    <center>
+        <VBox spacing="16"
+              style="
+                  -fx-padding: 24;
+              ">
+
+            <TableView fx:id="productTable"
+                       style="
+                           -fx-background-color: white;
+                           -fx-background-radius: 12;
+                           -fx-border-color: transparent;
+                       ">
+                <columns>
+                    <TableColumn text="Product" fx:id="nameColumn"/>
+                    <TableColumn text="Description" fx:id="descColumn"/>
+                    <TableColumn text="Price" fx:id="priceColumn"/>
+                    <TableColumn text="Actions" fx:id="actionsColumn"/>
+                </columns>
+            </TableView>
+
+            <Pagination fx:id="pagination"
+                        maxPageIndicatorCount="5"
+                        style="
+                            -fx-page-information-visible: false;
+                        "/>
+
+        </VBox>
+    </center>
+
+</BorderPane>

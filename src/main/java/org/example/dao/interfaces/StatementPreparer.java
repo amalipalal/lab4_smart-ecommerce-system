@@ -1,4 +1,4 @@
-package org.example.dao;
+package org.example.dao.interfaces;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

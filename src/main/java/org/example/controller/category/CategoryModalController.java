@@ -8,7 +8,7 @@ import org.example.dto.category.CreateCategoryRequest;
 import org.example.dto.category.CategoryResponse;
 import org.example.dto.category.UpdateCategoryRequest;
 import org.example.service.CategoryService;
-import org.example.util.DialogUtil;
+import org.example.util.ui.DialogUtil;
 
 public class CategoryModalController {
     public TextField nameField;

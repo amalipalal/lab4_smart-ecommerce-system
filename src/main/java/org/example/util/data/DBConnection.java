@@ -1,4 +1,4 @@
-package org.example.util;
+package org.example.util.data;
 
 import org.example.config.DatabaseConfig;
 import org.example.util.exception.DatabaseConnectionException;

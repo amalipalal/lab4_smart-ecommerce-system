@@ -1,11 +1,13 @@
 package org.example.dao.impl;
 
-import org.example.dao.ProductDAO;
-import org.example.dao.StatementPreparer;
+import org.example.dao.interfaces.ProductDAO;
+import org.example.dao.interfaces.StatementPreparer;
 import org.example.dao.exception.DAOException;
 import org.example.dao.exception.InsufficientStockException;
 import org.example.model.Product;
-import org.example.util.DBConnection;
+import org.example.model.ProductFilter;
+import org.example.util.data.DBConnection;
+import org.example.util.data.SqlAndParams;
 import org.example.util.exception.DatabaseConnectionException;
 
 import java.sql.*;
@@ -26,6 +28,14 @@ public class ProductJdbcDAO implements ProductDAO {
             LIMIT ? OFFSET ?
             """;
 
+    private static final String COUNT_ALL = """
+            SELECT COUNT(*) FROM product
+            """;
+
+    private static final String FILTER = """
+            SELECT * FROM product p
+            """;
+
     private static final String FIND_BY_CATEGORY = """
             SELECT * FROM product
             WHERE category_id = ?
@@ -37,6 +47,16 @@ public class ProductJdbcDAO implements ProductDAO {
             WHERE LOWER(name) LIKE LOWER(?)
             ORDER BY name ASC
             LIMIT ? OFFSET ?
+            """;
+
+    private static final String COUNT_BY_NAME = """
+            SELECT COUNT(*) FROM product
+            WHERE LOWER(name) LIKE LOWER(?)
+            """;
+
+    private static final String FILTER_COUNT = """
+            SELECT COUNT(*)
+            FROM product p
             """;
 
     private static final String SAVE = """
@@ -135,6 +155,25 @@ public class ProductJdbcDAO implements ProductDAO {
     }
 
     @Override
+    public int countAll() throws DAOException {
+        try(Connection conn = DBConnection.getConnection()){
+            PreparedStatement statement = conn.prepareStatement(COUNT_ALL);
+            try(ResultSet rs = statement.executeQuery()){
+                if(rs.next()) {
+                    long rowCount = rs.getLong(1);
+                    if(rowCount > Integer.MAX_VALUE)
+                        throw new DAOException("Product count exceeds integer range:" + rowCount, null);
+                    return (int) rowCount;
+                } else {
+                    return 0;
+                }
+            }
+        } catch (SQLException | DatabaseConnectionException e) {
+            throw new DAOException("Failed to get product count", e);
+        }
+    }
+
+    @Override
     public List<Product> findByCategory(UUID categoryId, int limit, int offset) throws DAOException {
         try {
             return queryList(FIND_BY_CATEGORY, ps -> {
@@ -157,6 +196,102 @@ public class ProductJdbcDAO implements ProductDAO {
             });
         } catch (SQLException | DatabaseConnectionException e) {
             throw new DAOException("Failed to retrieve products with name" + query, e);
+        }
+    }
+
+    @Override
+    public List<Product> findFiltered(ProductFilter filter, int limit, int offset) throws DAOException {
+        SqlAndParams where = buildWhereClause(filter);
+        String finalSql = FILTER + where.sql() + " ORDER BY p.name ASC LIMIT ? OFFSET ?";
+
+        List<Product> results = new ArrayList<>();
+
+        try(Connection conn = DBConnection.getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(finalSql);
+
+            int nextIndex = buildParams(ps, where);
+            ps.setInt(nextIndex++, limit);
+            ps.setInt(nextIndex, offset);
+
+            try(ResultSet rs = ps.executeQuery()) {
+                while (rs.next())
+                    results.add(mapRowToProduct(rs));
+            }
+        } catch (SQLException | DatabaseConnectionException e) {
+            throw new DAOException("Failed to fetch products", e);
+        }
+
+        return results;
+    }
+
+    private int buildParams(PreparedStatement ps, SqlAndParams where) throws SQLException{
+        int index = 1;
+        for (Object param : where.params()) {
+            ps.setObject(index++, param);
+        }
+
+        return index;
+    }
+
+    private SqlAndParams buildWhereClause(ProductFilter filter) {
+        StringBuilder sql = new StringBuilder(" WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+
+        if(filter.hasName() && !filter.name().isBlank()) {
+            sql.append(" AND p.name ILIKE ? ");
+            params.add("%" + filter.name() + "%");
+        }
+
+        if(filter.hasCategoryId()) {
+            sql.append(" AND p.category_id = ?");
+            params.add(filter.categoryId());
+        }
+
+        return new SqlAndParams(sql.toString(), params);
+    }
+
+    @Override
+    public int countByName(String query) throws DAOException {
+        try(Connection conn = DBConnection.getConnection()){
+            PreparedStatement ps = conn.prepareStatement(COUNT_BY_NAME);
+            ps.setString(1, "%" + query + "%");
+
+            try(ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    long rowCount = rs.getLong(1);
+                    if(rowCount > Integer.MAX_VALUE)
+                        throw new DAOException("Product count exceeds integer range:" + rowCount, null);
+                    return (int) rowCount;
+                } else {
+                    return 0;
+                }
+            }
+        } catch (SQLException | DatabaseConnectionException e) {
+            throw new DAOException("Failed to count products by name", e);
+        }
+    }
+
+    @Override
+    public int countFiltered(ProductFilter filter) throws DAOException {
+        SqlAndParams where = buildWhereClause(filter);
+        String finalSql = FILTER_COUNT + where.sql();
+
+        try(Connection conn = DBConnection.getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(finalSql);
+            buildParams(ps, where);
+
+            try(ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    long rowCount = rs.getLong(1);
+                    if(rowCount > Integer.MAX_VALUE)
+                        throw new DAOException("Product count exceeds integer range:" + rowCount, null);
+                    return (int) rowCount;
+                } else {
+                    return 0;
+                }
+            }
+        } catch (SQLException | DatabaseConnectionException e) {
+            throw new DAOException("Failed to count products", e);
         }
     }
 
