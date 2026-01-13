@@ -1,12 +1,12 @@
 package org.example.service;
 
-import org.example.UnitOfWorkFactory;
+import org.example.persistence.UnitOfWorkFactory;
 import org.example.cache.ProductCache;
 import org.example.dao.exception.DAOException;
 import org.example.dao.interfaces.ProductWriteDaoFactory;
 import org.example.dao.interfaces.product.ProductReadDao;
 import org.example.dao.interfaces.product.ProductWriteDao;
-import org.example.dao.interfaces.UnitOfWork;
+import org.example.persistence.UnitOfWork;
 import org.example.dto.product.CreateProductRequest;
 import org.example.dto.product.CreateProductResponse;
 import org.example.dto.product.ProductResponse;

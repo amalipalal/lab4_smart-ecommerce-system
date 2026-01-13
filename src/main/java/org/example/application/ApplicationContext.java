@@ -1,5 +1,6 @@
-package org.example;
+package org.example.application;
 
+import org.example.persistence.impl.sql.SqlUnitOfWorkFactory;
 import org.example.cache.ProductCache;
 import org.example.dao.impl.SqlCategoryWriteDaoFactory;
 import org.example.dao.impl.SqlProductWriteDaoFactory;

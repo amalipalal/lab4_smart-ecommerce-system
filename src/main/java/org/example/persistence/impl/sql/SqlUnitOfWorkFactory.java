@@ -1,7 +1,7 @@
-package org.example;
+package org.example.persistence.impl.sql;
 
-import org.example.dao.impl.SqlUnitOfWork;
-import org.example.dao.interfaces.UnitOfWork;
+import org.example.persistence.UnitOfWork;
+import org.example.persistence.UnitOfWorkFactory;
 import org.example.util.exception.DatabaseConnectionException;
 
 public class SqlUnitOfWorkFactory implements UnitOfWorkFactory {

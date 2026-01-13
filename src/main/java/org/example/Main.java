@@ -2,12 +2,14 @@ package org.example;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
+import org.example.application.ApplicationContext;
+import org.example.application.ApplicationControllerFactory;
 import org.example.ui.Router;
 
 public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
-        ApplicationContext  context = ApplicationContext.getInstance();
+        ApplicationContext context = ApplicationContext.getInstance();
         ApplicationControllerFactory factory = new ApplicationControllerFactory(context);
 
         Router.init(stage, factory);
