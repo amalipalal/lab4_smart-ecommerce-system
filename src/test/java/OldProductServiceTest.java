@@ -2,7 +2,7 @@ import org.example.dao.interfaces.ProductDAO;
 import org.example.dao.exception.DAOException;
 import org.example.dto.product.CreateProductRequest;
 import org.example.model.Product;
-import org.example.service.ProductService;
+import org.example.service.OldProductService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,13 +19,13 @@ import java.util.UUID;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ProductServiceTest {
+public class OldProductServiceTest {
 
     @Mock
     private ProductDAO productDAO;
 
     @InjectMocks
-    private ProductService productService;
+    private OldProductService oldProductService;
 
     @Test
     void testThrowsDaoWhenCreatingProduct() throws DAOException {
@@ -35,7 +35,7 @@ public class ProductServiceTest {
         doThrow(new DAOException("save failed", new SQLException())).when(productDAO).save(any(Product.class));
 
         Assertions.assertThrows(RuntimeException.class, () -> {
-            productService.createProduct(request);
+            oldProductService.createProduct(request);
         });
         verify(productDAO, times(1)).save(any(Product.class));
     }
@@ -45,7 +45,7 @@ public class ProductServiceTest {
         var request = new CreateProductRequest("name", "description",
                 12.05, 2, UUID.randomUUID());
 
-        var response = productService.createProduct(request);
+        var response = oldProductService.createProduct(request);
 
         ArgumentCaptor<Product> captor = ArgumentCaptor.forClass(Product.class);
         verify(productDAO, times(1)).save(captor.capture());
@@ -63,7 +63,7 @@ public class ProductServiceTest {
 
         when(productDAO.findById(product.getProductId())).thenReturn(Optional.of(product));
 
-        var response = productService.getProduct(product.getProductId());
+        var response = oldProductService.getProduct(product.getProductId());
 
         UUID expectedId = product.getProductId();
         UUID actualId = response.productId();
