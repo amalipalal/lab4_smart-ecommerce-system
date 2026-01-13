@@ -2,7 +2,6 @@ package org.example.service;
 
 import org.example.UnitOfWorkFactory;
 import org.example.cache.ProductCache;
-import org.example.dao.impl.product.SqlProductWriteDao;
 import org.example.dao.exception.DAOException;
 import org.example.dao.interfaces.ProductWriteDaoFactory;
 import org.example.dao.interfaces.product.ProductReadDao;
@@ -53,7 +52,7 @@ public class ProductService {
                     product.getDescription(), product.getCreatedAt().toString());
         } catch (Exception e) {
             unitOfWork.rollback();
-            throw new RuntimeException(e.getMessage(), e);
+            throw e;
         } finally {
             unitOfWork.close();
         }
@@ -114,7 +113,7 @@ public class ProductService {
         try {
             String key = "product:" + productId.toString();
             ProductWriteDao productDao = instantiateProductWriteDao(unitOfWork);
-            var productToUpdate = this.cache.getOrLoad(productId.toString(), () -> this.productReadDao.findById(productId)
+            var productToUpdate = this.cache.getOrLoad(key, () -> this.productReadDao.findById(productId)
                     .orElseThrow(() -> new ProductNotFoundException(productId.toString())));
 
             updateFetchedProduct(request, productToUpdate);
@@ -124,7 +123,7 @@ public class ProductService {
             this.cache.invalidateByPrefix("product:");
         } catch (Exception e) {
             unitOfWork.rollback();
-            throw new RuntimeException(e.getMessage(), e);
+            throw e;
         } finally {
             unitOfWork.close();
         }
