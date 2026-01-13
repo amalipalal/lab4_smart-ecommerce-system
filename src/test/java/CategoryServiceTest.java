@@ -1,7 +1,7 @@
-import org.example.UnitOfWorkFactory;
+import org.example.persistence.UnitOfWorkFactory;
 import org.example.cache.ProductCache;
 import org.example.dao.interfaces.CategoryWriteDaoFactory;
-import org.example.dao.interfaces.UnitOfWork;
+import org.example.persistence.UnitOfWork;
 import org.example.dao.interfaces.category.CategoryReadDao;
 import org.example.dao.interfaces.category.CategoryWriteDao;
 import org.example.dto.category.CreateCategoryRequest;
