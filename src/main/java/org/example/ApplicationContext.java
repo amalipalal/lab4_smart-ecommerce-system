@@ -2,9 +2,11 @@ package org.example;
 
 import org.example.cache.ProductCache;
 import org.example.dao.impl.SqlCategoryWriteDaoFactory;
+import org.example.dao.impl.SqlProductWriteDaoFactory;
 import org.example.dao.impl.category.SqlCategoryReadDao;
 import org.example.dao.impl.product.SqlProductReadDao;
 import org.example.dao.interfaces.CategoryWriteDaoFactory;
+import org.example.dao.interfaces.ProductWriteDaoFactory;
 import org.example.dao.interfaces.category.CategoryReadDao;
 import org.example.dao.interfaces.product.ProductReadDao;
 import org.example.service.CategoryService;
@@ -23,9 +25,12 @@ public class ApplicationContext {
         var cache = new ProductCache();
 
         CategoryWriteDaoFactory categoryWriteFactory = new SqlCategoryWriteDaoFactory();
+        ProductWriteDaoFactory productWriteDaoFactory = new SqlProductWriteDaoFactory();
 
-        this.categoryService = new CategoryService(categoryReadDao, new SqlUnitOfWorkFactory(), categoryWriteFactory, cache);
-        this.productService = new ProductService(productReadDao, new ProductCache(), new SqlUnitOfWorkFactory());
+        this.categoryService = new CategoryService(categoryReadDao,
+                new SqlUnitOfWorkFactory(), categoryWriteFactory, cache);
+        this.productService = new ProductService(productReadDao,
+                new ProductCache(), productWriteDaoFactory, new SqlUnitOfWorkFactory());
     }
 
     public static ApplicationContext getInstance() {
