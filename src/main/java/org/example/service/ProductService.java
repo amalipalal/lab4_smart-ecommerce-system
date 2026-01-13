@@ -4,6 +4,7 @@ import org.example.UnitOfWorkFactory;
 import org.example.cache.ProductCache;
 import org.example.dao.impl.product.SqlProductWriteDao;
 import org.example.dao.exception.DAOException;
+import org.example.dao.interfaces.ProductWriteDaoFactory;
 import org.example.dao.interfaces.product.ProductReadDao;
 import org.example.dao.interfaces.product.ProductWriteDao;
 import org.example.dao.interfaces.UnitOfWork;
@@ -23,11 +24,16 @@ public class ProductService {
 
     private final ProductReadDao productReadDao;
     private final ProductCache cache;
+    private final ProductWriteDaoFactory productWriteDaoFactory;
     private final UnitOfWorkFactory factory;
 
-    public ProductService(ProductReadDao productReadDao, ProductCache cache, UnitOfWorkFactory factory) {
+    public ProductService(ProductReadDao productReadDao,
+                          ProductCache cache,
+                          ProductWriteDaoFactory productWriteDaoFactory,
+                          UnitOfWorkFactory factory) {
         this.productReadDao = productReadDao;
         this.cache = cache;
+        this.productWriteDaoFactory = productWriteDaoFactory;
         this.factory = factory;
     }
 
@@ -54,7 +60,7 @@ public class ProductService {
     }
 
     private ProductWriteDao instantiateProductWriteDao(UnitOfWork unitOfWork) {
-        return new SqlProductWriteDao(unitOfWork.getConnection());
+        return this.productWriteDaoFactory.create(unitOfWork.getConnection());
     }
 
     public List<ProductResponse> getAllProducts(int limit, int offset) {
