@@ -3,7 +3,7 @@ import org.example.dao.exception.DAOException;
 import org.example.dto.category.CreateCategoryRequest;
 import org.example.dto.category.CategoryResponse;
 import org.example.model.Category;
-import org.example.service.CategoryService;
+import org.example.service.OldCategoryService;
 import org.example.service.exception.CategoryNotFoundException;
 import org.example.service.exception.DuplicateCategoryException;
 import org.junit.jupiter.api.Assertions;
@@ -22,13 +22,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class CategoryServiceTest {
+public class OldCategoryServiceTest {
 
     @Mock
     private CategoryDAO categoryDAO;
 
     @InjectMocks
-    private CategoryService categoryService;
+    private OldCategoryService oldCategoryService;
 
     @Test
     @DisplayName("Should throw an error when category name already exists")
@@ -45,7 +45,7 @@ public class CategoryServiceTest {
         when(categoryDAO.findByName(any())).thenReturn(Optional.of(existing));
 
         Assertions.assertThrows(DuplicateCategoryException.class, () -> {
-            categoryService.createCategory(request);
+            oldCategoryService.createCategory(request);
         });
     }
 
@@ -55,7 +55,7 @@ public class CategoryServiceTest {
         CreateCategoryRequest request = new CreateCategoryRequest("name", "description");
 
         when(categoryDAO.findByName(any())).thenReturn(Optional.empty());
-        CategoryResponse response = categoryService.createCategory(request);
+        CategoryResponse response = oldCategoryService.createCategory(request);
 
         String expected = request.name();
         String actual = response.name();
@@ -71,7 +71,7 @@ public class CategoryServiceTest {
         when(categoryDAO.findById(randomId)).thenReturn(Optional.empty());
 
         Assertions.assertThrows(CategoryNotFoundException.class, () -> {
-            categoryService.getCategory(randomId);
+            oldCategoryService.getCategory(randomId);
         });
     }
 
@@ -88,7 +88,7 @@ public class CategoryServiceTest {
         );
 
         when(categoryDAO.findById(id)).thenReturn(Optional.of(existing));
-        var response = categoryService.getCategory(id);
+        var response = oldCategoryService.getCategory(id);
 
         UUID expected = existing.getCategoryId();
         UUID actual = response.categoryId();
@@ -105,7 +105,7 @@ public class CategoryServiceTest {
         when(categoryDAO.findByName(randomName)).thenReturn(Optional.empty());
 
         Assertions.assertThrows(CategoryNotFoundException.class, () -> {
-            categoryService.getCategory(randomName);
+            oldCategoryService.getCategory(randomName);
         });
     }
 
@@ -123,7 +123,7 @@ public class CategoryServiceTest {
 
         when(categoryDAO.findByName(name)).thenReturn(Optional.of(existing));
 
-        var response = categoryService.getCategory(name);
+        var response = oldCategoryService.getCategory(name);
 
         String expectedName = existing.getName();
         String actualName = response.name();
