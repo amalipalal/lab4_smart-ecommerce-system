@@ -1,4 +1,4 @@
-package org.example;
+package org.example.application;
 
 import javafx.util.Callback;
 import org.example.controller.shell.BuyerShellController;

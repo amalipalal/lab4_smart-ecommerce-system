@@ -1,4 +1,4 @@
-package org.example;
+package org.example.application;
 
 import org.example.cache.ProductCache;
 import org.example.dao.impl.SqlCategoryWriteDaoFactory;
@@ -9,6 +9,7 @@ import org.example.dao.interfaces.CategoryWriteDaoFactory;
 import org.example.dao.interfaces.ProductWriteDaoFactory;
 import org.example.dao.interfaces.category.CategoryReadDao;
 import org.example.dao.interfaces.product.ProductReadDao;
+import org.example.persistence.impl.sql.SqlUnitOfWorkFactory;
 import org.example.service.CategoryService;
 import org.example.service.ProductService;
 
