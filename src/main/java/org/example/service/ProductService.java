@@ -1,7 +1,12 @@
 package org.example.service;
 
-import org.example.dao.interfaces.ProductDAO;
+import org.example.UnitOfWorkFactory;
+import org.example.cache.ProductCache;
+import org.example.dao.impl.product.SqlProductWriteDao;
 import org.example.dao.exception.DAOException;
+import org.example.dao.interfaces.ProductReadDao;
+import org.example.dao.interfaces.ProductWriteDao;
+import org.example.dao.interfaces.UnitOfWork;
 import org.example.dto.product.CreateProductRequest;
 import org.example.dto.product.CreateProductResponse;
 import org.example.dto.product.ProductResponse;
@@ -16,94 +21,116 @@ import java.util.UUID;
 
 public class ProductService {
 
-    private final ProductDAO productDAO;
+    private final ProductReadDao productReadDao;
+    private final ProductCache cache;
+    private final UnitOfWorkFactory factory;
 
-    public ProductService(ProductDAO productDAO) {
-        this.productDAO = productDAO;
+    public ProductService(ProductReadDao productReadDao, ProductCache cache, UnitOfWorkFactory factory) {
+        this.productReadDao = productReadDao;
+        this.cache = cache;
+        this.factory = factory;
     }
 
     public CreateProductResponse createProduct(CreateProductRequest request) {
+        UnitOfWork unitOfWork = this.factory.create();
         try {
+            ProductWriteDao productDao = instantiateProductWriteDao(unitOfWork);
+
             var product = new Product(UUID.randomUUID(), request.name(), request.description(),
                     request.price(), request.stock(), request.categoryId(), Instant.now(), Instant.now());
-            productDAO.save(product);
+            productDao.save(product);
+
+            unitOfWork.commit();
+            this.cache.invalidateByPrefix("product:");
 
             return new CreateProductResponse(product.getProductId(), product.getName(),
                     product.getDescription(), product.getCreatedAt().toString());
-        } catch (DAOException e) {
+        } catch (Exception e) {
+            unitOfWork.rollback();
             throw new RuntimeException(e.getMessage(), e);
+        } finally {
+            unitOfWork.close();
         }
+    }
+
+    private ProductWriteDao instantiateProductWriteDao(UnitOfWork unitOfWork) {
+        return new SqlProductWriteDao(unitOfWork.getConnection());
     }
 
     public List<ProductResponse> getAllProducts(int limit, int offset) {
-        try {
-            List<Product> products = this.productDAO.findAll(limit, offset);
-            return products.stream().map(ProductResponse::new).toList();
-        } catch (DAOException e) {
-            throw new RuntimeException(e);
-        }
+        String key = "product:all:" + limit + ":" + offset;
+        List<Product> products = this.cache.getOrLoad(key, () -> this.productReadDao.findAll(limit, offset));
+        return products.stream().map(ProductResponse::new).toList();
     }
 
     public int getProductCount() {
-        try {
-            return this.productDAO.countAll();
-        } catch (DAOException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
+        return this.productReadDao.countAll();
     }
 
     public ProductResponse getProduct(UUID productId) {
-        try {
-            var product = this.productDAO.findById(productId)
-                    .orElseThrow(() -> new ProductNotFoundException(productId.toString()));
+        String key = "product:" + productId.toString();
+        var product = this.cache.getOrLoad(key, () -> this.productReadDao.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException(productId.toString())));
 
-            return new ProductResponse(product);
-        } catch (DAOException e) {
-            throw new RuntimeException(e);
-        }
+        return new ProductResponse(product);
     }
 
     public int countProductsByFilter(ProductFilter filter) {
-        try {
-            return this.productDAO.countFiltered(filter);
-        } catch (DAOException e) {
-            throw new RuntimeException(e);
-        }
+        String key = "product:count:" + filter.hashCode();
+        return this.cache.getOrLoad(key, () -> this.productReadDao.countFiltered(filter));
     }
 
     public void deleteProduct(UUID productId) {
+        UnitOfWork unitOfWork = this.factory.create();
         try {
-            this.productDAO.deleteById(productId);
+            ProductWriteDao productWriteDao = instantiateProductWriteDao(unitOfWork);
+
+            productWriteDao.deleteById(productId);
+            unitOfWork.commit();
+
+            this.cache.invalidateByPrefix("product:");
         } catch (DAOException e) {
+            unitOfWork.rollback();
             throw new RuntimeException(e);
+        } finally {
+            unitOfWork.close();
         }
     }
 
     public List<ProductResponse> searchProducts(ProductFilter filter, int limit, int offset) {
-        try {
-            List<Product> products = this.productDAO.findFiltered(filter, limit, offset);
-            return products.stream().map(ProductResponse::new).toList();
-        } catch (DAOException e) {
-            throw new RuntimeException(e);
-        }
+        String key = "product:search" + filter.hashCode() + limit + offset;
+        var products = this.cache.getOrLoad(key, () -> this.productReadDao.findFiltered(filter, limit, offset));
+        return products.stream().map(ProductResponse::new).toList();
     }
 
     public void updateProduct(UUID productId, UpdateProductRequest request) {
+        UnitOfWork unitOfWork = this.factory.create();
         try {
-            var productToUpdate = this.productDAO.findById(productId)
-                    .orElseThrow(() -> new ProductNotFoundException(productId.toString()));
+            String key = "product:" + productId.toString();
+            ProductWriteDao productDao = instantiateProductWriteDao(unitOfWork);
+            var productToUpdate = this.cache.getOrLoad(productId.toString(), () -> this.productReadDao.findById(productId)
+                    .orElseThrow(() -> new ProductNotFoundException(productId.toString())));
 
-            if(request.name() != null) productToUpdate.setName(request.name());
-            if(request.description() != null) productToUpdate.setDescription(request.description());
-            if(request.stock() != null) productToUpdate.setStockQuantity(request.stock());
-            if(request.price() != null) productToUpdate.setPrice(request.price());
-            if(request.categoryId() != null) productToUpdate.setCategoryId(request.categoryId());
+            updateFetchedProduct(request, productToUpdate);
 
-            productToUpdate.setUpdatedAt(Instant.now());
-
-            this.productDAO.update(productToUpdate);
-        } catch (DAOException e) {
+            productDao.update(productToUpdate);
+            unitOfWork.commit();
+            this.cache.invalidateByPrefix("product:");
+        } catch (Exception e) {
+            unitOfWork.rollback();
             throw new RuntimeException(e.getMessage(), e);
+        } finally {
+            unitOfWork.close();
         }
+    }
+
+    private void updateFetchedProduct(UpdateProductRequest request, Product productToUpdate) {
+        if(request.name() != null) productToUpdate.setName(request.name());
+        if(request.description() != null) productToUpdate.setDescription(request.description());
+        if(request.stock() != null) productToUpdate.setStockQuantity(request.stock());
+        if(request.price() != null) productToUpdate.setPrice(request.price());
+        if(request.categoryId() != null) productToUpdate.setCategoryId(request.categoryId());
+
+        productToUpdate.setUpdatedAt(Instant.now());
     }
 }
