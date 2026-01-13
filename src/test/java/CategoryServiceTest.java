@@ -1,7 +1,11 @@
-import org.example.dao.interfaces.CategoryDAO;
-import org.example.dao.exception.DAOException;
+import org.example.UnitOfWorkFactory;
+import org.example.cache.ProductCache;
+import org.example.dao.interfaces.CategoryWriteDaoFactory;
+import org.example.dao.interfaces.UnitOfWork;
+import org.example.dao.interfaces.category.CategoryReadDao;
+import org.example.dao.interfaces.category.CategoryWriteDao;
 import org.example.dto.category.CreateCategoryRequest;
-import org.example.dto.category.CategoryResponse;
+import org.example.dto.category.UpdateCategoryRequest;
 import org.example.model.Category;
 import org.example.service.CategoryService;
 import org.example.service.exception.CategoryNotFoundException;
@@ -14,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.sql.Connection;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -22,112 +27,125 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class CategoryServiceTest {
+class CategoryServiceTest {
 
     @Mock
-    private CategoryDAO categoryDAO;
+    private CategoryReadDao readDao;
+
+    @Mock
+    private CategoryWriteDao writeDao;
+
+    @Mock
+    private UnitOfWorkFactory unitOfWorkFactory;
+
+    @Mock
+    private UnitOfWork unitOfWork;
+
+    @Mock
+    private Connection connection;
+
+    @Mock
+    private ProductCache cache;
+
+    @Mock
+    private CategoryWriteDaoFactory writeDaoFactory;
 
     @InjectMocks
     private CategoryService categoryService;
 
     @Test
-    @DisplayName("Should throw an error when category name already exists")
-    void testCreateExistingCategory() throws DAOException {
-        CreateCategoryRequest request = new CreateCategoryRequest("name", "description");
-        Category existing = new Category(
-                UUID.randomUUID(),
-                "name",
-                "description",
-                Instant.now(),
-                Instant.now()
+    @DisplayName("Should throw error when creating a category with duplicate name")
+    void shouldThrowWhenCreatingDuplicateCategory() {
+        CreateCategoryRequest request =
+                new CreateCategoryRequest("electronics", "desc");
+
+        when(unitOfWorkFactory.create()).thenReturn(unitOfWork);
+        when(unitOfWork.getConnection()).thenReturn(connection);
+        when(writeDaoFactory.create(connection)).thenReturn(writeDao);
+        when(readDao.findByName("electronics"))
+                .thenReturn(Optional.of(mock(Category.class)));
+
+        Assertions.assertThrows(
+                DuplicateCategoryException.class,
+                () -> categoryService.createCategory(request)
         );
-
-        when(categoryDAO.findByName(any())).thenReturn(Optional.of(existing));
-
-        Assertions.assertThrows(DuplicateCategoryException.class, () -> {
-            categoryService.createCategory(request);
-        });
     }
 
     @Test
-    @DisplayName("Should create a new category and return a response")
-    void testCreateNewCategory() throws DAOException {
-        CreateCategoryRequest request = new CreateCategoryRequest("name", "description");
+    @DisplayName("Should create category successfully")
+    void shouldCreateCategorySuccessfully() {
+        CreateCategoryRequest request =
+                new CreateCategoryRequest("books", "desc");
 
-        when(categoryDAO.findByName(any())).thenReturn(Optional.empty());
-        CategoryResponse response = categoryService.createCategory(request);
+        when(unitOfWorkFactory.create()).thenReturn(unitOfWork);
+        when(unitOfWork.getConnection()).thenReturn(connection);
+        when(writeDaoFactory.create(connection)).thenReturn(writeDao);
+        when(readDao.findByName(any())).thenReturn(Optional.empty());
 
-        String expected = request.name();
-        String actual = response.name();
+        var response = categoryService.createCategory(request);
 
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertEquals("books", response.name());
+        verify(unitOfWork).commit();
+        verify(cache).invalidateByPrefix("category:");
     }
 
     @Test
-    @DisplayName("Should throw NotFoundException when category not found")
-    void testGetNonExistingCategoryById() throws DAOException{
-        UUID randomId = UUID.randomUUID();
-
-        when(categoryDAO.findById(randomId)).thenReturn(Optional.empty());
-
-        Assertions.assertThrows(CategoryNotFoundException.class, () -> {
-            categoryService.getCategory(randomId);
-        });
-    }
-
-    @Test
-    @DisplayName("Should get an existing category with id")
-    void testGetExistingCategoryById() throws DAOException {
+    @DisplayName("Should throw error when updating non-existing category")
+    void shouldThrowWhenUpdatingMissingCategory() {
         UUID id = UUID.randomUUID();
-        Category existing = new Category(
-                id,
-                "name",
-                "description",
-                Instant.now(),
-                Instant.now()
+        UpdateCategoryRequest request =
+                new UpdateCategoryRequest(id, "new", "desc");
+
+        when(unitOfWorkFactory.create()).thenReturn(unitOfWork);
+        when(unitOfWork.getConnection()).thenReturn(connection);
+        when(writeDaoFactory.create(connection)).thenReturn(writeDao);
+        when(readDao.findById(id)).thenReturn(Optional.empty());
+
+        Assertions.assertThrows(
+                CategoryNotFoundException.class,
+                () -> categoryService.updateCategory(request)
+        );
+    }
+
+
+    @Test
+    @DisplayName("Should throw error when category not found by id")
+    void shouldThrowWhenCategoryNotFoundById() {
+        UUID id = UUID.randomUUID();
+
+        when(cache.getOrLoad(any(), any()))
+                .thenThrow(new CategoryNotFoundException(id.toString()));
+
+        Assertions.assertThrows(
+                CategoryNotFoundException.class,
+                () -> categoryService.getCategory(id)
+        );
+    }
+
+    @Test
+    @DisplayName("Should return category when found by id")
+    void shouldReturnCategoryById() {
+        UUID id = UUID.randomUUID();
+        Category category = new Category(
+                id, "games", "desc", Instant.now(), Instant.now()
         );
 
-        when(categoryDAO.findById(id)).thenReturn(Optional.of(existing));
+        when(cache.getOrLoad(any(), any())).thenReturn(category);
+
         var response = categoryService.getCategory(id);
 
-        UUID expected = existing.getCategoryId();
-        UUID actual = response.categoryId();
-
-        Assertions.assertEquals(expected, actual);
-    }
-
-
-    @Test
-    @DisplayName("Should throw NotFoundException when category name not found")
-    void testGetNonExistingCategoryByName() throws DAOException {
-        String randomName = "non-existent-category";
-
-        when(categoryDAO.findByName(randomName)).thenReturn(Optional.empty());
-
-        Assertions.assertThrows(CategoryNotFoundException.class, () -> {
-            categoryService.getCategory(randomName);
-        });
+        Assertions.assertEquals(id, response.categoryId());
     }
 
     @Test
-    @DisplayName("Should get an existing category with name")
-    void testGetExistingCategoryByName() throws DAOException {
-        String name = "electronics";
-        Category existing = new Category(
-                UUID.randomUUID(),
-                name,
-                "description",
-                Instant.now(),
-                Instant.now()
+    @DisplayName("Should throw error when category not found by name")
+    void shouldThrowWhenCategoryNotFoundByName() {
+        when(cache.getOrLoad(any(), any()))
+                .thenThrow(new CategoryNotFoundException("missing"));
+
+        Assertions.assertThrows(
+                CategoryNotFoundException.class,
+                () -> categoryService.getCategory("missing")
         );
-
-        when(categoryDAO.findByName(name)).thenReturn(Optional.of(existing));
-
-        var response = categoryService.getCategory(name);
-
-        String expectedName = existing.getName();
-        String actualName = response.name();
-
-        Assertions.assertEquals(expectedName, actualName);
     }
 }
