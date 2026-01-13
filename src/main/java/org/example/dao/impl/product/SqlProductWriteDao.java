@@ -2,7 +2,7 @@ package org.example.dao.impl.product;
 
 import org.example.dao.exception.DAOException;
 import org.example.dao.exception.InsufficientStockException;
-import org.example.dao.interfaces.ProductWriteDao;
+import org.example.dao.interfaces.product.ProductWriteDao;
 import org.example.model.Product;
 
 import java.sql.Connection;

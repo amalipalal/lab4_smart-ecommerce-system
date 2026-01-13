@@ -2,7 +2,7 @@ package org.example.service;
 
 import org.example.dao.exception.DAOException;
 import org.example.dao.interfaces.OrdersDAO;
-import org.example.dao.interfaces.ProductDAO;
+import org.example.dao.interfaces.product.ProductDAO;
 import org.example.dto.order.CustomerDetails;
 import org.example.dto.order.OrderRequest;
 import org.example.model.Orders;

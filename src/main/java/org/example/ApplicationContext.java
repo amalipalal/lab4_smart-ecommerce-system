@@ -4,7 +4,7 @@ import org.example.cache.ProductCache;
 import org.example.dao.impl.product.SqlProductReadDao;
 import org.example.dao.interfaces.CategoryDAO;
 import org.example.dao.impl.CategoryJdbcDAO;
-import org.example.dao.interfaces.ProductReadDao;
+import org.example.dao.interfaces.product.ProductReadDao;
 import org.example.service.CategoryService;
 import org.example.service.ProductService;
 

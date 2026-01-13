@@ -1,4 +1,4 @@
-package org.example.dao.interfaces;
+package org.example.dao.interfaces.product;
 
 import org.example.dao.exception.DAOException;
 import org.example.model.Product;

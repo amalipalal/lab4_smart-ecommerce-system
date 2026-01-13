@@ -1,7 +1,7 @@
 package org.example.dao.impl.product;
 
 import org.example.dao.exception.DAOException;
-import org.example.dao.interfaces.ProductReadDao;
+import org.example.dao.interfaces.product.ProductReadDao;
 import org.example.dao.interfaces.StatementPreparer;
 import org.example.model.Product;
 import org.example.model.ProductFilter;
