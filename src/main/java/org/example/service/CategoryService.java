@@ -1,6 +1,6 @@
 package org.example.service;
 
-import org.example.UnitOfWorkFactory;
+import org.example.persistence.UnitOfWorkFactory;
 import org.example.cache.ProductCache;
 import org.example.dao.interfaces.*;
 import org.example.dao.interfaces.category.CategoryReadDao;
@@ -9,6 +9,7 @@ import org.example.dto.category.CreateCategoryRequest;
 import org.example.dto.category.CategoryResponse;
 import org.example.dto.category.UpdateCategoryRequest;
 import org.example.model.Category;
+import org.example.persistence.UnitOfWork;
 import org.example.service.exception.CategoryNotFoundException;
 import org.example.service.exception.DuplicateCategoryException;
 
