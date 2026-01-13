@@ -1,9 +1,8 @@
-package org.example.dao.interfaces;
+package org.example.persistence;
 
 import org.example.util.exception.DatabaseConnectionException;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 public interface UnitOfWork {
     Connection getConnection();

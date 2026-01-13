@@ -1,6 +1,6 @@
-package org.example.dao.impl;
+package org.example.persistence.impl.sql;
 
-import org.example.dao.interfaces.UnitOfWork;
+import org.example.persistence.UnitOfWork;
 import org.example.util.data.DBConnection;
 import org.example.util.exception.DatabaseConnectionException;
 

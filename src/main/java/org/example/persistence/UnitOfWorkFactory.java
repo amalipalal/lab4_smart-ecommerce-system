@@ -1,6 +1,5 @@
-package org.example;
+package org.example.persistence;
 
-import org.example.dao.interfaces.UnitOfWork;
 import org.example.util.exception.DatabaseConnectionException;
 
 public interface UnitOfWorkFactory {
