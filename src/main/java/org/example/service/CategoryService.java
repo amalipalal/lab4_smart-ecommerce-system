@@ -1,7 +1,11 @@
 package org.example.service;
 
-import org.example.dao.interfaces.CategoryDAO;
-import org.example.dao.exception.DAOException;
+import org.example.UnitOfWorkFactory;
+import org.example.cache.ProductCache; // same generic cache class
+import org.example.dao.impl.category.SqlCategoryWriteDao;
+import org.example.dao.interfaces.*;
+import org.example.dao.interfaces.category.CategoryReadDao;
+import org.example.dao.interfaces.category.CategoryWriteDao;
 import org.example.dto.category.CreateCategoryRequest;
 import org.example.dto.category.CategoryResponse;
 import org.example.dto.category.UpdateCategoryRequest;
@@ -15,111 +19,147 @@ import java.util.UUID;
 
 public class CategoryService {
 
-    private final CategoryDAO categoryDAO;
+    private final CategoryReadDao readDao;
+    private final UnitOfWorkFactory unitOfWorkFactory;
+    private final ProductCache cache;
 
-    public CategoryService(CategoryDAO categoryDAO) {
-        this.categoryDAO = categoryDAO;
+    public CategoryService(
+            CategoryReadDao readDao,
+            UnitOfWorkFactory unitOfWorkFactory,
+            ProductCache cache
+    ) {
+        this.readDao = readDao;
+        this.unitOfWorkFactory = unitOfWorkFactory;
+        this.cache = cache;
     }
 
     public CategoryResponse createCategory(CreateCategoryRequest request) {
+        UnitOfWork unitOfWork = unitOfWorkFactory.create();
         try {
-            if (this.categoryDAO.findByName(request.name()).isPresent())
+            CategoryWriteDao writeDao = new SqlCategoryWriteDao(unitOfWork.getConnection());
+
+            if (readDao.findByName(request.name()).isPresent())
                 throw new DuplicateCategoryException(request.name());
 
-            var category = new Category(
-                    UUID.randomUUID(),
-                    request.name(),
-                    request.description(),
-                    Instant.now(),
-                    Instant.now()
-            );
-            this.categoryDAO.save(category);
+            var category = instantiateCategoryObject(request);
+
+            writeDao.save(category);
+            unitOfWork.commit();
+
+            cache.invalidateByPrefix("category:");
 
             return new CategoryResponse(category);
-        } catch (DAOException e) {
-            throw new RuntimeException(e.getMessage(), e);
+        } catch (Exception e) {
+            unitOfWork.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            unitOfWork.close();
         }
+    }
+
+    private Category instantiateCategoryObject(CreateCategoryRequest request) {
+        return new Category(
+                UUID.randomUUID(),
+                request.name(),
+                request.description(),
+                Instant.now(),
+                Instant.now()
+        );
     }
 
     public CategoryResponse updateCategory(UpdateCategoryRequest request) {
+        UnitOfWork unitOfWork = unitOfWorkFactory.create();
         try {
-            var categoryToUpdate = this.categoryDAO.findById(request.categoryId())
+            CategoryWriteDao writeDao = new SqlCategoryWriteDao(unitOfWork.getConnection());
+
+            Category existing = readDao.findById(request.categoryId())
                     .orElseThrow(() -> new CategoryNotFoundException(request.categoryId().toString()));
 
-            if(this.categoryDAO.findByName(request.name()).isPresent())
+            if (!existing.getName().equals(request.name()) &&
+                    readDao.findByName(request.name()).isPresent()) {
                 throw new DuplicateCategoryException(request.name());
+            }
 
-            var updatedCategory = new Category(
-                    categoryToUpdate.getCategoryId(),
+            Category updated = new Category(
+                    existing.getCategoryId(),
                     request.name(),
                     request.description(),
-                    categoryToUpdate.getCreatedAt(),
+                    existing.getCreatedAt(),
                     Instant.now()
             );
 
-            this.categoryDAO.update(updatedCategory);
-            return new CategoryResponse(updatedCategory);
+            writeDao.update(updated);
+            unitOfWork.commit();
 
-        } catch (DAOException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            cache.invalidateByPrefix("category:");
+
+            return new CategoryResponse(updated);
+        } catch (Exception e) {
+            unitOfWork.rollback();
+            throw new RuntimeException(e);
+        } finally {
+            unitOfWork.close();
         }
     }
 
-    public CategoryResponse getCategory(UUID categoryId) {
-        try {
-            var category = this.categoryDAO.findById(categoryId)
-                    .orElseThrow(() ->
-                            new CategoryNotFoundException(categoryId.toString()));
+    public CategoryResponse getCategory(UUID id) {
+        String key = "category:" + id;
 
-            return new CategoryResponse(category);
-        } catch (DAOException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
+        Category category = cache.getOrLoad(key, () ->
+                readDao.findById(id)
+                        .orElseThrow(() -> new CategoryNotFoundException(id.toString()))
+        );
+
+        return new CategoryResponse(category);
     }
 
     public CategoryResponse getCategory(String name) {
-        try {
-            var category = this.categoryDAO.findByName(name)
-                    .orElseThrow(() ->
-                            new CategoryNotFoundException(name));
+        String key = "category:name:" + name;
 
-            return new CategoryResponse(category);
-        } catch (DAOException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
+        Category category = cache.getOrLoad(key, () ->
+                readDao.findByName(name)
+                        .orElseThrow(() -> new CategoryNotFoundException(name))
+        );
+
+        return new CategoryResponse(category);
     }
 
     public List<CategoryResponse> getCategory(String query, int limit, int offset) {
-        try {
-            List<Category> categories = this.categoryDAO.searchByName(query, limit, offset);
-            return categories.stream().map(CategoryResponse::new).toList();
-        } catch (DAOException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
-    }
-
-    public int countCategoriesByName(String query) {
-        try {
-            return this.categoryDAO.countByName(query);
-        } catch (DAOException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
+        String key = "category:search:" + query + ":" + limit + ":" + offset;
+        List<Category> categories = cache.getOrLoad(key, () -> readDao.searchByName(query, limit, offset));
+        return categories.stream().map(CategoryResponse::new).toList();
     }
 
     public List<CategoryResponse> getAllCategories(int limit, int offset) {
-        try {
-            List<Category> allCategories = categoryDAO.findAll(limit, offset);
-            return allCategories.stream().map(CategoryResponse::new).toList();
-        } catch (DAOException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
+        String key = "category:all:" + limit + ":" + offset;
+
+        List<Category> categories = cache.getOrLoad(key, () ->
+                readDao.findAll(limit, offset)
+        );
+
+        return categories.stream().map(CategoryResponse::new).toList();
     }
 
     public int getCategoryCount() {
-        try {
-            return categoryDAO.count();
-        } catch (DAOException e) {
-            throw new RuntimeException(e.getMessage(), e);
-        }
+        String key = "category:count";
+        return cache.getOrLoad(key, readDao::count);
+    }
+
+    public List<CategoryResponse> searchCategories(String query, int limit, int offset) {
+        String key = "category:search:" + query + ":" + limit + ":" + offset;
+
+        List<Category> categories = cache.getOrLoad(key, () ->
+                readDao.searchByName(query, limit, offset)
+        );
+
+        return categories.stream().map(CategoryResponse::new).toList();
+    }
+
+    public int countCategoriesByName(String query) {
+        String key = "category:count:" + query;
+
+        return cache.getOrLoad(key, () ->
+                readDao.countByName(query)
+        );
     }
 }
