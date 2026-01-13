@@ -1,8 +1,7 @@
 package org.example.service;
 
 import org.example.UnitOfWorkFactory;
-import org.example.cache.ProductCache; // same generic cache class
-import org.example.dao.impl.category.SqlCategoryWriteDao;
+import org.example.cache.ProductCache;
 import org.example.dao.interfaces.*;
 import org.example.dao.interfaces.category.CategoryReadDao;
 import org.example.dao.interfaces.category.CategoryWriteDao;
@@ -21,22 +20,25 @@ public class CategoryService {
 
     private final CategoryReadDao readDao;
     private final UnitOfWorkFactory unitOfWorkFactory;
+    private final CategoryWriteDaoFactory categoryWriteDaoFactory;
     private final ProductCache cache;
 
     public CategoryService(
             CategoryReadDao readDao,
             UnitOfWorkFactory unitOfWorkFactory,
+            CategoryWriteDaoFactory categoryWriteDaoFactory,
             ProductCache cache
     ) {
         this.readDao = readDao;
         this.unitOfWorkFactory = unitOfWorkFactory;
+        this.categoryWriteDaoFactory = categoryWriteDaoFactory;
         this.cache = cache;
     }
 
     public CategoryResponse createCategory(CreateCategoryRequest request) {
         UnitOfWork unitOfWork = unitOfWorkFactory.create();
         try {
-            CategoryWriteDao writeDao = new SqlCategoryWriteDao(unitOfWork.getConnection());
+            CategoryWriteDao writeDao = categoryWriteDaoFactory.create(unitOfWork.getConnection());
 
             if (readDao.findByName(request.name()).isPresent())
                 throw new DuplicateCategoryException(request.name());
@@ -51,7 +53,7 @@ public class CategoryService {
             return new CategoryResponse(category);
         } catch (Exception e) {
             unitOfWork.rollback();
-            throw new RuntimeException(e);
+            throw e;
         } finally {
             unitOfWork.close();
         }
@@ -70,7 +72,7 @@ public class CategoryService {
     public CategoryResponse updateCategory(UpdateCategoryRequest request) {
         UnitOfWork unitOfWork = unitOfWorkFactory.create();
         try {
-            CategoryWriteDao writeDao = new SqlCategoryWriteDao(unitOfWork.getConnection());
+            CategoryWriteDao writeDao = categoryWriteDaoFactory.create(unitOfWork.getConnection());
 
             Category existing = readDao.findById(request.categoryId())
                     .orElseThrow(() -> new CategoryNotFoundException(request.categoryId().toString()));
@@ -96,7 +98,7 @@ public class CategoryService {
             return new CategoryResponse(updated);
         } catch (Exception e) {
             unitOfWork.rollback();
-            throw new RuntimeException(e);
+            throw e;
         } finally {
             unitOfWork.close();
         }
