@@ -17,7 +17,8 @@ public class ActionCell<T> extends TableCell<T, Void> {
             icon.setIconSize(def.iconSize());
             btn.setGraphic(icon);
             btn.getStyleClass().add(def.styleClass());
-            btn.setOnAction(e -> def.action().accept(getTableView().getItems().get(getIndex())));
+            if(def.action() != null)
+                btn.setOnAction(e -> def.action().accept(getTableView().getItems().get(getIndex())));
             container.getChildren().add(btn);
         }
     }

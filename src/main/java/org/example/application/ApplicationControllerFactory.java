@@ -20,7 +20,11 @@ public class ApplicationControllerFactory implements Callback<Class<?>, Object> 
         } else if (cls == AdminProductController.class) {
             return new AdminProductController(context.getProductService(),context.getCategoryService());
         } else if (cls == BuyerShellController.class) {
-            return new BuyerShellController(context.getProductService(), context.getCategoryService());
+            return new BuyerShellController(
+                    context.getProductService(),
+                    context.getCategoryService(),
+                    context.getOrderService()
+            );
         }
 
         try {
