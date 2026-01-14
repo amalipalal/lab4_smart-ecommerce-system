@@ -4,11 +4,17 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import org.example.controller.order.OrderModalController;
 import org.example.dto.category.CategoryResponse;
 import org.example.dto.product.ProductResponse;
 import org.example.model.ProductFilter;
 import org.example.service.CategoryService;
+import org.example.service.OrderService;
 import org.example.service.ProductService;
 import org.example.ui.ActionCell;
 import org.example.ui.ActionDefinition;
@@ -40,14 +46,20 @@ public class BuyerShellController {
 
     private final ProductService productService;
     private final CategoryService categoryService;
+    private final OrderService orderService;
     private final ObservableList<ProductResponse> products = FXCollections.observableArrayList();
     private final ObservableList<CategoryResponse> categories = FXCollections.observableArrayList();
 
     private final int PAGE_SIZE = 5;
 
-    public BuyerShellController(ProductService productService, CategoryService categoryService) {
+    public BuyerShellController(
+            ProductService productService,
+            CategoryService categoryService,
+            OrderService orderService
+    ) {
         this.productService = productService;
         this.categoryService = categoryService;
+        this.orderService = orderService;
     }
 
     @FXML
@@ -81,7 +93,7 @@ public class BuyerShellController {
                                 "fas-shopping-cart",
                                 14,
                                 "icon-btn",
-                                null
+                                this::openOrderModal
                         ),
                         new ActionDefinition<>(
                                 "fas-comments",
@@ -176,4 +188,29 @@ public class BuyerShellController {
         pagination.setCurrentPageIndex(0);
         setupPagination();
     }
+
+    public void openOrderModal(ProductResponse product) {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/fxml/buyer/order-modal.fxml")
+            );
+            OrderModalController orderModalController = new OrderModalController(this.orderService);
+
+            loader.setController(orderModalController);
+
+            Stage stage = new Stage();
+            stage.setScene(new Scene(loader.load()));
+            stage.setTitle("Place Order");
+            stage.initModality(Modality.APPLICATION_MODAL);
+
+            OrderModalController controller = loader.getController();
+            controller.setProduct(product);
+
+            stage.showAndWait();
+        } catch (Exception e) {
+            DialogUtil.showError("Failed to initiate purchase", e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
 }
