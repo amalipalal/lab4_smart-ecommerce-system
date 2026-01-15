@@ -59,7 +59,7 @@ public class OrderModalController {
             DialogUtil.showInfo("Success", "Order placed successfully");
             close();
         } catch (Exception e) {
-            DialogUtil.showError("Order Failed", e.getMessage());
+            DialogUtil.showError("Order Failed", "Failed to save your order. Please try again later.");
         }
     }
 
