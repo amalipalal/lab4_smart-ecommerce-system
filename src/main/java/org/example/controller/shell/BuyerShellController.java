@@ -192,8 +192,7 @@ public class BuyerShellController {
     public void openOrderModal(ProductResponse product) {
         try {
             FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/fxml/buyer/order-modal.fxml")
-            );
+                    getClass().getResource("/fxml/buyer/order-modal.fxml"));
             OrderModalController orderModalController = new OrderModalController(this.orderService);
 
             loader.setController(orderModalController);
@@ -207,6 +206,7 @@ public class BuyerShellController {
             controller.setProduct(product);
 
             stage.showAndWait();
+            setupPagination();
         } catch (Exception e) {
             DialogUtil.showError("Failed to initiate purchase", e.getMessage());
             e.printStackTrace();
