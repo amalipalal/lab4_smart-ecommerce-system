@@ -70,7 +70,8 @@ public class OrderService {
             unitOfWork.commit();
         } catch (DAOException e) {
             unitOfWork.rollback();
-            throw e;
+            e.printStackTrace();
+            throw new RuntimeException("Error trying to place order. Try again later");
         } finally {
             unitOfWork.close();
         }
