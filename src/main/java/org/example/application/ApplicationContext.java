@@ -1,6 +1,10 @@
 package org.example.application;
 
+import org.example.dao.impl.customer.SqlCustomerReadDao;
+import org.example.dao.impl.customer.SqlCustomerWriteDaoFactory;
 import org.example.dao.impl.order.SqlOrderWriteDaoFactory;
+import org.example.dao.interfaces.customer.CustomerReadDao;
+import org.example.dao.interfaces.customer.CustomerWriteDaoFactory;
 import org.example.dao.interfaces.order.OrderWriteDaoFactory;
 import org.example.persistence.impl.sql.SqlUnitOfWorkFactory;
 import org.example.cache.ProductCache;
@@ -26,12 +30,14 @@ public class ApplicationContext {
     private ApplicationContext() {
         CategoryReadDao categoryReadDao = new SqlCategoryReadDao();
         ProductReadDao productReadDao = new SqlProductReadDao();
+        CustomerReadDao customerReadDao = new SqlCustomerReadDao();
 
         var cache = new ProductCache();
 
         CategoryWriteDaoFactory categoryWriteFactory = new SqlCategoryWriteDaoFactory();
         ProductWriteDaoFactory productWriteDaoFactory = new SqlProductWriteDaoFactory();
         OrderWriteDaoFactory orderWriteDaoFactory = new SqlOrderWriteDaoFactory();
+        CustomerWriteDaoFactory customerWriteDaoFactory = new SqlCustomerWriteDaoFactory();
 
         var unitOfWork = new SqlUnitOfWorkFactory();
 
@@ -40,7 +46,13 @@ public class ApplicationContext {
         this.productService = new ProductService(productReadDao,
                 new ProductCache(), productWriteDaoFactory, new SqlUnitOfWorkFactory());
         this.orderService = new OrderService(
-                productReadDao, unitOfWork, productWriteDaoFactory, orderWriteDaoFactory, cache);
+                customerReadDao,
+                productReadDao,
+                unitOfWork,
+                customerWriteDaoFactory,
+                productWriteDaoFactory,
+                orderWriteDaoFactory,
+                cache);
     }
 
     public static ApplicationContext getInstance() {
