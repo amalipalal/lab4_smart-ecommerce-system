@@ -23,7 +23,7 @@ public class ApplicationControllerFactory implements Callback<Class<?>, Object> 
             return new BuyerShellController(
                     context.getProductService(),
                     context.getCategoryService(),
-                    context.getOrderService()
+                    context.getPurchaseService()
             );
         }
 

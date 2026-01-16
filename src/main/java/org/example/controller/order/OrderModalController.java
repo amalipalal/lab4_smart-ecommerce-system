@@ -6,7 +6,7 @@ import javafx.stage.Stage;
 import org.example.dto.order.CustomerDetails;
 import org.example.dto.order.OrderRequest;
 import org.example.dto.product.ProductResponse;
-import org.example.service.OrderService;
+import org.example.service.PurchaseService;
 import org.example.util.ui.DialogUtil;
 
 
@@ -35,11 +35,11 @@ public class OrderModalController {
     @FXML
     private Button placeOrderBtn;
 
-    private final OrderService orderService;
+    private final PurchaseService purchaseService;
     private ProductResponse product;
 
-    public OrderModalController(OrderService orderService) {
-        this.orderService = orderService;
+    public OrderModalController(PurchaseService purchaseService) {
+        this.purchaseService = purchaseService;
     }
 
     public void setProduct(ProductResponse product) {
@@ -54,7 +54,7 @@ public class OrderModalController {
             OrderRequest orderRequest = buildOrderRequest();
             CustomerDetails customerDetails = buildCustomerDetails();
 
-            orderService.placeOrder(orderRequest, customerDetails);
+            purchaseService.purchaseProduct(orderRequest, customerDetails);
 
             DialogUtil.showInfo("Success", "Order placed successfully");
             close();
