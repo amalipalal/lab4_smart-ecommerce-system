@@ -44,7 +44,7 @@ public class ApplicationContext {
         this.categoryService = new CategoryService(categoryReadDao,
                 new SqlUnitOfWorkFactory(), categoryWriteFactory, cache);
         this.productService = new ProductService(productReadDao,
-                new ProductCache(), productWriteDaoFactory, new SqlUnitOfWorkFactory());
+                cache, productWriteDaoFactory, new SqlUnitOfWorkFactory());
         this.orderService = new OrderService(
                 customerReadDao,
                 productReadDao,
