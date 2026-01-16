@@ -6,8 +6,10 @@ import org.example.dto.product.ProductResponse;
 import org.example.dto.product.UpdateProductRequest;
 import org.example.model.Product;
 import org.example.model.ProductFilter;
+import org.example.service.exception.ProductNotFoundException;
 import org.example.store.ProductStore;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,22 +22,24 @@ public class ProductService {
     }
 
     public CreateProductResponse createProduct(CreateProductRequest request) {
-        Product product = this.productStore.createProduct(request);
-        return new CreateProductResponse(product.getProductId(), product.getName(),
-                product.getDescription(), product.getCreatedAt().toString());
-    }
-
-    public List<ProductResponse> getAllProducts(int limit, int offset) {
-        List<Product> products = this.productStore.getAllProducts(limit, offset);
-        return products.stream().map(ProductResponse::new).toList();
-    }
-
-    public int getProductCount() {
-        return this.productStore.countAllProducts();
+        Product product = new Product(
+                UUID.randomUUID(),
+                request.name(),
+                request.description(),
+                request.price(),
+                request.stock(),
+                request.categoryId(),
+                Instant.now(),
+                Instant.now()
+        );
+        Product saved = this.productStore.createProduct(product);
+        return new CreateProductResponse(saved.getProductId(), saved.getName(),
+                saved.getDescription(), saved.getCreatedAt().toString());
     }
 
     public ProductResponse getProduct(UUID productId) {
-        Product product = this.productStore.getProduct(productId);
+        Product product = this.productStore.getProduct(productId)
+                .orElseThrow(() -> new ProductNotFoundException(productId.toString()));
         return new ProductResponse(product);
     }
 
@@ -44,7 +48,9 @@ public class ProductService {
     }
 
     public void deleteProduct(UUID productId) {
-        this.productStore.deleteProduct(productId);
+        Product existing = this.productStore.getProduct(productId).orElseThrow(
+                () -> new ProductNotFoundException(productId.toString()));
+        this.productStore.deleteProduct(existing.getProductId());
     }
 
     public List<ProductResponse> searchProducts(ProductFilter filter, int limit, int offset) {
@@ -53,6 +59,20 @@ public class ProductService {
     }
 
     public void updateProduct(UUID productId, UpdateProductRequest request) {
-        this.productStore.updateProduct(productId, request);
+        Product existing = this.productStore.getProduct(productId)
+                .orElseThrow(() -> new ProductNotFoundException(productId.toString()));
+
+        Product updated = new Product(
+                existing.getProductId(),
+                request.name() != null ? request.name() : existing.getName(),
+                request.description() != null ? request.description() : existing.getDescription(),
+                request.price() != null ? request.price() : existing.getPrice(),
+                request.stock() != null ? request.stock() : existing.getStockQuantity(),
+                request.categoryId() != null ? request.categoryId() : existing.getCategoryId(),
+                existing.getCreatedAt(),
+                Instant.now()
+        );
+
+        this.productStore.updateProduct(updated);
     }
 }
