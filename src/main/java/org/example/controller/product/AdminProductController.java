@@ -207,6 +207,11 @@ public class AdminProductController {
         setupPagination();
     }
 
+    @FXML
+    protected void handleRefresh(){
+        setupPagination();
+    }
+
     private void refreshPagination() {
         setupPagination();
     }

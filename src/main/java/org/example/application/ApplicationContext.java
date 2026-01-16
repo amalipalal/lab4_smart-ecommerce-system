@@ -1,5 +1,11 @@
 package org.example.application;
 
+import org.example.dao.impl.customer.SqlCustomerReadDao;
+import org.example.dao.impl.customer.SqlCustomerWriteDaoFactory;
+import org.example.dao.impl.order.SqlOrderWriteDaoFactory;
+import org.example.dao.interfaces.customer.CustomerReadDao;
+import org.example.dao.interfaces.customer.CustomerWriteDaoFactory;
+import org.example.dao.interfaces.order.OrderWriteDaoFactory;
 import org.example.persistence.impl.sql.SqlUnitOfWorkFactory;
 import org.example.cache.ProductCache;
 import org.example.dao.impl.SqlCategoryWriteDaoFactory;
@@ -11,6 +17,7 @@ import org.example.dao.interfaces.ProductWriteDaoFactory;
 import org.example.dao.interfaces.category.CategoryReadDao;
 import org.example.dao.interfaces.product.ProductReadDao;
 import org.example.service.CategoryService;
+import org.example.service.OrderService;
 import org.example.service.ProductService;
 
 public class ApplicationContext {
@@ -18,20 +25,34 @@ public class ApplicationContext {
     private static ApplicationContext instance;
     private final CategoryService categoryService;
     private final ProductService productService;
+    private final OrderService orderService;
 
     private ApplicationContext() {
         CategoryReadDao categoryReadDao = new SqlCategoryReadDao();
         ProductReadDao productReadDao = new SqlProductReadDao();
+        CustomerReadDao customerReadDao = new SqlCustomerReadDao();
 
         var cache = new ProductCache();
 
         CategoryWriteDaoFactory categoryWriteFactory = new SqlCategoryWriteDaoFactory();
         ProductWriteDaoFactory productWriteDaoFactory = new SqlProductWriteDaoFactory();
+        OrderWriteDaoFactory orderWriteDaoFactory = new SqlOrderWriteDaoFactory();
+        CustomerWriteDaoFactory customerWriteDaoFactory = new SqlCustomerWriteDaoFactory();
+
+        var unitOfWork = new SqlUnitOfWorkFactory();
 
         this.categoryService = new CategoryService(categoryReadDao,
                 new SqlUnitOfWorkFactory(), categoryWriteFactory, cache);
         this.productService = new ProductService(productReadDao,
-                new ProductCache(), productWriteDaoFactory, new SqlUnitOfWorkFactory());
+                cache, productWriteDaoFactory, new SqlUnitOfWorkFactory());
+        this.orderService = new OrderService(
+                customerReadDao,
+                productReadDao,
+                unitOfWork,
+                customerWriteDaoFactory,
+                productWriteDaoFactory,
+                orderWriteDaoFactory,
+                cache);
     }
 
     public static ApplicationContext getInstance() {
@@ -48,4 +69,6 @@ public class ApplicationContext {
     public ProductService getProductService() {
         return productService;
     }
+
+    public OrderService getOrderService() { return orderService; }
 }

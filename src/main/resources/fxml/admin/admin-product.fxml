@@ -39,6 +39,27 @@
 
         <Pane HBox.hgrow="ALWAYS"/>
 
+        <Button
+                text="Refresh"
+                onAction="#handleRefresh"
+                style="
+            -fx-background-color: #e5e7eb;
+            -fx-text-fill: #111827;
+            -fx-font-size: 12px;
+            -fx-padding: 10 14;
+            -fx-background-radius: 10;
+            -fx-cursor: hand;
+        ">
+            <graphic>
+                <FontIcon iconLiteral="fas-sync"
+                          iconSize="12"
+                          iconColor="#111827"/>
+            </graphic>
+            <tooltip>
+                <Tooltip text="Refresh products"/>
+            </tooltip>
+        </Button>
+
         <Button fx:id="addProductBtn"
                 text="Add Product"
                 onAction="#handleAddProduct"
