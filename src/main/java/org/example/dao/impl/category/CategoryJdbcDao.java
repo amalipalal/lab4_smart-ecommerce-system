@@ -1,11 +1,9 @@
-package org.example.dao.impl;
+package org.example.dao.impl.category;
 
-import org.example.dao.interfaces.CategoryDAO;
+import org.example.dao.interfaces.category.CategoryDao;
 import org.example.dao.interfaces.StatementPreparer;
 import org.example.dao.exception.DAOException;
 import org.example.model.Category;
-import org.example.util.data.DBConnection;
-import org.example.util.exception.DatabaseConnectionException;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -13,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class CategoryJdbcDAO implements CategoryDAO {
+public class CategoryJdbcDao implements CategoryDao {
 
     private static  final String FIND_BY_ID = """
             SELECT * FROM category
@@ -62,19 +60,15 @@ public class CategoryJdbcDAO implements CategoryDAO {
             """;
 
     @Override
-    public Optional<Category> findById(UUID categoryId) throws DAOException {
-        try(Connection conn = DBConnection.getConnection()) {
-            PreparedStatement ps = conn.prepareStatement(FIND_BY_ID);
-
+    public Optional<Category> findById(Connection conn, UUID categoryId) throws DAOException {
+        try (PreparedStatement ps = conn.prepareStatement(FIND_BY_ID)) {
             ps.setObject(1, categoryId);
-            try(ResultSet rs = ps.executeQuery()) {
-                if(rs.next())
-                    return Optional.of(map(rs));
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return Optional.of(map(rs));
             }
-        } catch (SQLException | DatabaseConnectionException e) {
+        } catch (SQLException e) {
             throw new DAOException("Failed to fetch category " + categoryId, e);
         }
-
         return Optional.empty();
     }
 
@@ -89,138 +83,118 @@ public class CategoryJdbcDAO implements CategoryDAO {
     }
 
     @Override
-    public Optional<Category> findByName(String name) throws DAOException {
-        try(Connection conn = DBConnection.getConnection()) {
-            PreparedStatement ps = conn.prepareStatement(FIND_BY_NAME);
-
+    public Optional<Category> findByName(Connection conn, String name) throws DAOException {
+        try (PreparedStatement ps = conn.prepareStatement(FIND_BY_NAME)) {
             ps.setObject(1, name);
-            try(ResultSet rs = ps.executeQuery()) {
-                if(rs.next())
-                    return Optional.of(map(rs));
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return Optional.of(map(rs));
             }
-        } catch (SQLException | DatabaseConnectionException e) {
+        } catch (SQLException e) {
             throw new DAOException("Failed to fetch category " + name, e);
         }
-
         return Optional.empty();
     }
 
     @Override
-    public List<Category> searchByName(String query, int limit, int offset) throws DAOException {
+    public List<Category> searchByName(Connection conn, String query, int limit, int offset) throws DAOException {
         List<Category> categories = new ArrayList<>();
-
-        try (Connection conn = DBConnection.getConnection()) {
-            PreparedStatement ps = conn.prepareStatement(SEARCH_BY_NAME);
-
+        try (PreparedStatement ps = conn.prepareStatement(SEARCH_BY_NAME)) {
             ps.setString(1, "%" + query + "%");
             ps.setInt(2, limit);
             ps.setInt(3, offset);
-
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     categories.add(map(rs));
                 }
             }
-        } catch (SQLException | DatabaseConnectionException e) {
+        } catch (SQLException e) {
             throw new DAOException("Failed to search categories by name", e);
         }
-
         return categories;
     }
 
     @Override
-    public int countByName(String query) throws DAOException {
-        try (Connection conn = DBConnection.getConnection()) {
-            PreparedStatement ps = conn.prepareStatement(COUNT_BY_NAME);
+    public int countByName(Connection conn, String query) throws DAOException {
+        try (PreparedStatement ps = conn.prepareStatement(COUNT_BY_NAME)) {
             ps.setString(1, "%" + query + "%");
-
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt(1);
                 }
                 return 0;
             }
-        } catch (SQLException | DatabaseConnectionException e) {
+        } catch (SQLException e) {
             throw new DAOException("Failed to count categories by name", e);
         }
     }
 
     @Override
-    public List<Category> findAll(int limit, int offset) throws DAOException {
+    public List<Category> findAll(Connection conn, int limit, int offset) throws DAOException {
         List<Category> categories = new ArrayList<>();
-
-        try(Connection conn = DBConnection.getConnection()) {
-            PreparedStatement ps = conn.prepareStatement(FIND_ALL);
-
+        try (PreparedStatement ps = conn.prepareStatement(FIND_ALL)) {
             ps.setObject(1, limit);
             ps.setObject(2, offset);
-            try(ResultSet rs = ps.executeQuery()) {
-                while(rs.next()) {
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
                     categories.add(map(rs));
                 }
             }
-        } catch (SQLException | DatabaseConnectionException e) {
+        } catch (SQLException e) {
             throw new DAOException("Failed to fetch all categories" + e.getMessage(), e);
         }
         return categories;
     }
 
     @Override
-    public void save(Category category) throws DAOException {
+    public void save(Connection conn, Category category) throws DAOException {
         try {
-            insertionQuery(SAVE, ps -> {
+            insertionQuery(conn, SAVE, ps -> {
                 ps.setObject(1, category.getCategoryId());
                 ps.setString(2, category.getName());
                 ps.setString(3, category.getDescription());
                 ps.setTimestamp(4, Timestamp.from(category.getCreatedAt()));
                 ps.setTimestamp(5, Timestamp.from(category.getUpdatedAt()));
             });
-        } catch (SQLException | DatabaseConnectionException e) {
+        } catch (SQLException e) {
             throw new DAOException("Failed to save " + category.getName() + "category.", e);
         }
     }
 
-    private void insertionQuery(String query, StatementPreparer preparer) throws SQLException,
-            DatabaseConnectionException {
-        try(Connection conn = DBConnection.getConnection()) {
-            PreparedStatement ps = conn.prepareStatement(query);
-
-            if(preparer != null) preparer.prepare(ps);
-
+    private void insertionQuery(Connection conn, String query, StatementPreparer preparer) throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement(query)) {
+            if (preparer != null) preparer.prepare(ps);
             ps.executeUpdate();
         }
     }
 
     @Override
-    public void update(Category category) throws DAOException {
+    public void update(Connection conn, Category category) throws DAOException {
         try {
-            insertionQuery(UPDATE, ps -> {
+            insertionQuery(conn, UPDATE, ps -> {
                 ps.setString(1, category.getName());
                 ps.setString(2, category.getDescription());
                 ps.setTimestamp(3, Timestamp.from(category.getUpdatedAt()));
                 ps.setObject(4, category.getCategoryId());
             });
-        } catch (SQLException | DatabaseConnectionException e) {
+        } catch (SQLException e) {
             throw new DAOException("Failed to update " + category.getName() + "category.", e);
         }
     }
 
     @Override
-    public int count() throws DAOException {
-        try(Connection conn = DBConnection.getConnection()) {
-            PreparedStatement ps = conn.prepareStatement(COUNT);
-
-            try(ResultSet rs = ps.executeQuery()) {
-                if(rs.next()) {
+    public int count(Connection conn) throws DAOException {
+        try (PreparedStatement ps = conn.prepareStatement(COUNT)) {
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
                     long rowCount = rs.getLong(1);
-                    if(rowCount > Integer.MAX_VALUE)
+                    if (rowCount > Integer.MAX_VALUE)
                         throw new DAOException("Category count exceeds integer range: " + rowCount, null);
                     return (int) rowCount;
                 } else {
                     return 0;
                 }
             }
-        } catch (SQLException | DatabaseConnectionException e) {
+        } catch (SQLException e) {
             throw new DAOException("Failed to get category count.", e);
         }
     }
