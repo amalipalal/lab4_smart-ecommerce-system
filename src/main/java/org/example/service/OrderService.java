@@ -1,15 +1,12 @@
 package org.example.service;
 
 import org.example.cache.ProductCache;
-import org.example.dao.exception.DAOException;
-import org.example.dao.interfaces.OrdersDAO;
 import org.example.dao.interfaces.ProductWriteDaoFactory;
 import org.example.dao.interfaces.customer.CustomerReadDao;
 import org.example.dao.interfaces.customer.CustomerWriteDao;
 import org.example.dao.interfaces.customer.CustomerWriteDaoFactory;
 import org.example.dao.interfaces.order.OrderWriteDao;
 import org.example.dao.interfaces.order.OrderWriteDaoFactory;
-import org.example.dao.interfaces.product.ProductDAO;
 import org.example.dao.interfaces.product.ProductReadDao;
 import org.example.dao.interfaces.product.ProductWriteDao;
 import org.example.dto.order.CustomerDetails;
@@ -21,11 +18,7 @@ import org.example.persistence.UnitOfWork;
 import org.example.persistence.UnitOfWorkFactory;
 import org.example.service.exception.InsufficientProductStock;
 import org.example.service.exception.ProductNotFoundException;
-import org.example.util.data.DBConnection;
-import org.example.util.exception.DatabaseConnectionException;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
