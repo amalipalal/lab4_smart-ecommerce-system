@@ -2,7 +2,7 @@ package org.example.store;
 
 import org.example.cache.ProductCache;
 import org.example.config.DataSource;
-import org.example.dao.interfaces.product.ProductDao;
+import org.example.dao.interfaces.ProductDao;
 import org.example.dto.product.CreateProductRequest;
 import org.example.dto.product.UpdateProductRequest;
 import org.example.model.Product;

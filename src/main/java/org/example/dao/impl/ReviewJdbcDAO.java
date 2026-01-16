@@ -1,11 +1,11 @@
 package org.example.dao.impl;
 
+import org.example.config.DBConnection;
 import org.example.dao.interfaces.ReviewDAO;
 import org.example.dao.interfaces.StatementPreparer;
 import org.example.dao.exception.DAOException;
 import org.example.model.Review;
-import org.example.util.data.DBConnection;
-import org.example.util.exception.DatabaseConnectionException;
+import org.example.config.exception.DatabaseConnectionException;
 
 import java.sql.*;
         import java.util.ArrayList;

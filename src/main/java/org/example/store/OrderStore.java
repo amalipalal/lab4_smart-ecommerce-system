@@ -2,9 +2,9 @@ package org.example.store;
 
 import org.example.cache.ProductCache;
 import org.example.config.DataSource;
-import org.example.dao.interfaces.customer.CustomerDao;
-import org.example.dao.interfaces.order.OrdersDao;
-import org.example.dao.interfaces.product.ProductDao;
+import org.example.dao.interfaces.CustomerDao;
+import org.example.dao.interfaces.OrdersDao;
+import org.example.dao.interfaces.ProductDao;
 import org.example.dto.order.CustomerDetails;
 import org.example.dto.order.OrderRequest;
 import org.example.model.Customer;
