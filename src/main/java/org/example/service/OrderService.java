@@ -139,7 +139,8 @@ public class OrderService {
     private void invalidateCache(UUID productId) {
         cache.invalidate("product:" + productId);
         cache.invalidateByPrefix("product:all:");
-        cache.invalidateByPrefix("product:search");
+        cache.invalidateByPrefix("product:search:");
+        cache.invalidateByPrefix("product:count:");
     }
 
     public void oldPlaceOrder(OrderRequest orderRequest, CustomerDetails customerDetails) {
