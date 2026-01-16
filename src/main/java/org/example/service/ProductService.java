@@ -103,7 +103,7 @@ public class ProductService {
     }
 
     public List<ProductResponse> searchProducts(ProductFilter filter, int limit, int offset) {
-        String key = "product:search" + filter.hashCode() + limit + offset;
+        String key = "product:search:" + filter.hashCode() + limit + offset;
         var products = this.cache.getOrLoad(key, () -> this.productReadDao.findFiltered(filter, limit, offset));
         return products.stream().map(ProductResponse::new).toList();
     }
