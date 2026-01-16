@@ -31,16 +31,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class OrderService {
-    private OrdersDAO ordersDAO;
-    private ProductDAO productDAO;
-
-    private CustomerReadDao customerReadDao;
-    private ProductReadDao productReadDao;
-    private UnitOfWorkFactory unitOfWorkFactory;
-    private CustomerWriteDaoFactory customerWriteDaoFactory;
-    private ProductWriteDaoFactory productWriteDaoFactory;
-    private OrderWriteDaoFactory orderWriteDaoFactory;
-    private ProductCache cache;
+    private final CustomerReadDao customerReadDao;
+    private final ProductReadDao productReadDao;
+    private final UnitOfWorkFactory unitOfWorkFactory;
+    private final CustomerWriteDaoFactory customerWriteDaoFactory;
+    private final ProductWriteDaoFactory productWriteDaoFactory;
+    private final OrderWriteDaoFactory orderWriteDaoFactory;
+    private final ProductCache cache;
 
     public OrderService(
             CustomerReadDao customerReadDao,
@@ -60,11 +57,6 @@ public class OrderService {
         this.cache = cache;
     }
 
-    public OrderService(OrdersDAO ordersDAO, ProductDAO productDAO) {
-        this.ordersDAO = ordersDAO;
-        this.productDAO = productDAO;
-    }
-
     public void placeOrder(OrderRequest orderRequest, CustomerDetails customerDetails) {
         // create a unit of work object to represent a single transaction
         UnitOfWork unitOfWork = unitOfWorkFactory.create();
@@ -81,7 +73,7 @@ public class OrderService {
 
             unitOfWork.commit();
             invalidateCache(product.getProductId());
-        } catch (DAOException e) {
+        } catch (Exception e) {
             unitOfWork.rollback();
             e.printStackTrace();
             throw e;
@@ -141,27 +133,5 @@ public class OrderService {
         cache.invalidateByPrefix("product:all:");
         cache.invalidateByPrefix("product:search:");
         cache.invalidateByPrefix("product:count:");
-    }
-
-    public void oldPlaceOrder(OrderRequest orderRequest, CustomerDetails customerDetails) {
-        try(Connection conn = DBConnection.getConnection()) {
-            conn.setAutoCommit(false);
-
-            Product product = this.productDAO.findById(conn, orderRequest.productId())
-                    .orElseThrow(() -> new RuntimeException("Product not found"));
-
-            if(product.getStockQuantity() - orderRequest.quantity() < 0)
-                throw new RuntimeException("Insufficient Stock");
-
-            this.productDAO.reduceStock(conn, product.getProductId(), orderRequest.quantity());
-
-            double totalPrice = product.getPrice() * orderRequest.quantity();
-            Orders order = createOrder(orderRequest, null, totalPrice);  // TODO: Add customer id
-
-            this.ordersDAO.save(conn, order);
-            conn.commit();
-        } catch (SQLException | DatabaseConnectionException | DAOException e) {
-            throw new RuntimeException(e);
-        }
     }
 }
