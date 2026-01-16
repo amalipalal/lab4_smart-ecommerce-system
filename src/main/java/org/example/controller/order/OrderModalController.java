@@ -7,7 +7,7 @@ import org.example.dto.order.CustomerDetails;
 import org.example.dto.order.OrderRequest;
 import org.example.dto.product.ProductResponse;
 import org.example.service.PurchaseService;
-import org.example.util.ui.DialogUtil;
+import org.example.util.DialogUtil;
 
 
 public class OrderModalController {

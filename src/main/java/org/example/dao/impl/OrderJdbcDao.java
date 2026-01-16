@@ -1,6 +1,6 @@
-package org.example.dao.impl.order;
+package org.example.dao.impl;
 
-import org.example.dao.interfaces.order.OrdersDao;
+import org.example.dao.interfaces.OrdersDao;
 import org.example.dao.exception.DAOException;
 import org.example.model.Orders;
 

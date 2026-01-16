@@ -2,7 +2,7 @@ package org.example.store;
 
 import org.example.cache.ProductCache;
 import org.example.config.DataSource;
-import org.example.dao.interfaces.category.CategoryDao;
+import org.example.dao.interfaces.CategoryDao;
 import org.example.dto.category.CreateCategoryRequest;
 import org.example.dto.category.UpdateCategoryRequest;
 import org.example.model.Category;

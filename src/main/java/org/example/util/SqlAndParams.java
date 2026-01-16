@@ -1,4 +1,4 @@
-package org.example.util.data;
+package org.example.util;
 
 import java.util.List;
 

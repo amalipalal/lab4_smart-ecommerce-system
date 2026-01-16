@@ -1,7 +1,6 @@
-package org.example.util.data;
+package org.example.config;
 
-import org.example.config.DatabaseConfig;
-import org.example.util.exception.DatabaseConnectionException;
+import org.example.config.exception.DatabaseConnectionException;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

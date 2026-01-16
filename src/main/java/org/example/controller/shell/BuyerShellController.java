@@ -19,8 +19,8 @@ import org.example.service.ProductService;
 import org.example.ui.ActionCell;
 import org.example.ui.ActionDefinition;
 import org.example.ui.Router;
-import org.example.util.ui.DialogUtil;
-import org.example.util.ui.FormatUtil;
+import org.example.util.DialogUtil;
+import org.example.util.FormatUtil;
 
 import java.util.List;
 
