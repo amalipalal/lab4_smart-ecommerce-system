@@ -1,19 +1,20 @@
-package org.example.dao.impl;
+package org.example.dao.impl.order;
 
-import org.example.dao.interfaces.OrdersDAO;
-import org.example.dao.interfaces.StatementPreparer;
+import org.example.dao.interfaces.order.OrdersDao;
 import org.example.dao.exception.DAOException;
 import org.example.model.Orders;
-import org.example.util.data.DBConnection;
-import org.example.util.exception.DatabaseConnectionException;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class OrderJdbcDAO implements OrdersDAO {
+public class OrderJdbcDao implements OrdersDao {
     private static final String FIND_BY_ID = """
         SELECT * FROM orders
         WHERE order_id = ?
@@ -35,17 +36,15 @@ public class OrderJdbcDAO implements OrdersDAO {
         """;
 
     @Override
-    public Optional<Orders> findById(UUID orderId) throws DAOException {
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(FIND_BY_ID)) {
-
+    public Optional<Orders> findById(Connection conn, UUID orderId) throws DAOException {
+        try (PreparedStatement ps = conn.prepareStatement(FIND_BY_ID)) {
             ps.setObject(1, orderId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return Optional.of(map(rs));
                 }
             }
-        } catch (SQLException | DatabaseConnectionException e) {
+        } catch (SQLException e) {
             throw new DAOException("Failed to fetch order " + orderId, e);
         }
         return Optional.empty();
@@ -64,22 +63,18 @@ public class OrderJdbcDAO implements OrdersDAO {
     }
 
     @Override
-    public List<Orders> findByCustomer(UUID customerId, int limit, int offset) throws DAOException {
+    public List<Orders> findByCustomer(Connection conn, UUID customerId, int limit, int offset) throws DAOException {
         List<Orders> orders = new ArrayList<>();
-
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(FIND_BY_CUSTOMER)) {
-
+        try (PreparedStatement ps = conn.prepareStatement(FIND_BY_CUSTOMER)) {
             ps.setObject(1, customerId);
             ps.setInt(2, limit);
             ps.setInt(3, offset);
-
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     orders.add(map(rs));
                 }
             }
-        } catch (SQLException | DatabaseConnectionException e) {
+        } catch (SQLException e) {
             throw new DAOException("Failed to fetch orders for customer " + customerId, e);
         }
         return orders;
@@ -87,7 +82,7 @@ public class OrderJdbcDAO implements OrdersDAO {
 
     @Override
     public void save(Connection conn, Orders order) throws DAOException {
-        try(PreparedStatement ps = conn.prepareStatement(SAVE)) {
+        try (PreparedStatement ps = conn.prepareStatement(SAVE)) {
             ps.setObject(1, order.getOrderId());
             ps.setObject(2, order.getCustomerId());
             ps.setTimestamp(3, Timestamp.from(order.getOrderDate()));
@@ -95,7 +90,6 @@ public class OrderJdbcDAO implements OrdersDAO {
             ps.setString(5, order.getShippingCountry());
             ps.setString(6, order.getShippingCity());
             ps.setString(7, order.getShippingPostalCode());
-
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new DAOException("Failed to save order " + order.getOrderId(), e);
