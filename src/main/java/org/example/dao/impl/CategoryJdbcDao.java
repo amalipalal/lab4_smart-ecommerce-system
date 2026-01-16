@@ -1,6 +1,6 @@
-package org.example.dao.impl.category;
+package org.example.dao.impl;
 
-import org.example.dao.interfaces.category.CategoryDao;
+import org.example.dao.interfaces.CategoryDao;
 import org.example.dao.interfaces.StatementPreparer;
 import org.example.dao.exception.DAOException;
 import org.example.model.Category;

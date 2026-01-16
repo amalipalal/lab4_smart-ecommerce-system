@@ -1,6 +1,6 @@
-package org.example.dao.impl.customer;
+package org.example.dao.impl;
 
-import org.example.dao.interfaces.customer.CustomerDao;
+import org.example.dao.interfaces.CustomerDao;
 import org.example.dao.exception.DAOException;
 import org.example.model.Customer;
 

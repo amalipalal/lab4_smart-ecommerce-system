@@ -1,4 +1,4 @@
-package org.example.util.exception;
+package org.example.config.exception;
 
 public class DatabaseConnectionException extends RuntimeException {
     public DatabaseConnectionException(String message) {

@@ -1,11 +1,11 @@
-package org.example.dao.impl.product;
+package org.example.dao.impl;
 
 import org.example.dao.exception.DAOException;
 import org.example.dao.exception.InsufficientStockException;
-import org.example.dao.interfaces.product.ProductDao;
+import org.example.dao.interfaces.ProductDao;
 import org.example.model.Product;
 import org.example.model.ProductFilter;
-import org.example.util.data.SqlAndParams;
+import org.example.util.SqlAndParams;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

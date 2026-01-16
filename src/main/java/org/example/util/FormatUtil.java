@@ -1,4 +1,4 @@
-package org.example.util.ui;
+package org.example.util;
 
 import java.time.Instant;
 import java.time.LocalDateTime;

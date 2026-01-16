@@ -1,4 +1,4 @@
-package org.example.dao.interfaces.order;
+package org.example.dao.interfaces;
 
 import org.example.dao.exception.DAOException;
 import org.example.model.Orders;
