@@ -14,13 +14,13 @@ import org.example.dto.category.CategoryResponse;
 import org.example.dto.product.ProductResponse;
 import org.example.model.ProductFilter;
 import org.example.service.CategoryService;
-import org.example.service.OrderService;
+import org.example.service.PurchaseService;
 import org.example.service.ProductService;
 import org.example.ui.ActionCell;
 import org.example.ui.ActionDefinition;
 import org.example.ui.Router;
-import org.example.util.ui.DialogUtil;
-import org.example.util.ui.FormatUtil;
+import org.example.util.DialogUtil;
+import org.example.util.FormatUtil;
 
 import java.util.List;
 
@@ -46,7 +46,7 @@ public class BuyerShellController {
 
     private final ProductService productService;
     private final CategoryService categoryService;
-    private final OrderService orderService;
+    private final PurchaseService purchaseService;
     private final ObservableList<ProductResponse> products = FXCollections.observableArrayList();
     private final ObservableList<CategoryResponse> categories = FXCollections.observableArrayList();
 
@@ -55,11 +55,11 @@ public class BuyerShellController {
     public BuyerShellController(
             ProductService productService,
             CategoryService categoryService,
-            OrderService orderService
+            PurchaseService purchaseService
     ) {
         this.productService = productService;
         this.categoryService = categoryService;
-        this.orderService = orderService;
+        this.purchaseService = purchaseService;
     }
 
     @FXML
@@ -193,7 +193,7 @@ public class BuyerShellController {
         try {
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/fxml/buyer/order-modal.fxml"));
-            OrderModalController orderModalController = new OrderModalController(this.orderService);
+            OrderModalController orderModalController = new OrderModalController(this.purchaseService);
 
             loader.setController(orderModalController);
 
