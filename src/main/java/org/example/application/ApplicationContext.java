@@ -15,6 +15,7 @@ import org.example.service.CategoryService;
 import org.example.service.PurchaseService;
 import org.example.service.ProductService;
 import org.example.store.CategoryStore;
+import org.example.store.CustomerStore;
 import org.example.store.OrderStore;
 import org.example.store.ProductStore;
 
@@ -40,10 +41,11 @@ public class ApplicationContext {
                 cache, customerDao, productDao, ordersDao);
         ProductStore productStore = new ProductStore(dataSource, cache, productDao);
         CategoryStore categoryStore = new CategoryStore(dataSource, cache, categoryDao);
+        CustomerStore customerStore = new CustomerStore(dataSource, cache, customerDao);
 
         this.categoryService = new CategoryService(categoryStore);
         this.productService = new ProductService(productStore);
-        this.purchaseService = new PurchaseService(orderStore);
+        this.purchaseService = new PurchaseService(orderStore, productStore, customerStore);
     }
 
     public static ApplicationContext getInstance() {
