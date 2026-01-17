@@ -34,7 +34,10 @@ public class OrderStore {
             conn.setAutoCommit(false);
             try {
                 this.productDao.update(conn, product);
-                this.customerDao.save(conn, customer);
+                // Check if the customer making order should be saved in db or not
+                if(this.customerDao.findById(conn, customer.getCustomerId()).isEmpty())
+                    this.customerDao.save(conn, customer);
+
                 this.ordersDao.save(conn, order);
 
                 conn.commit();
