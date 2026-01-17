@@ -5,8 +5,12 @@ import org.example.dto.category.CategoryResponse;
 import org.example.dto.category.UpdateCategoryRequest;
 import org.example.model.Category;
 import org.example.store.CategoryStore;
+import org.example.service.exception.CategoryNotFoundException;
+import org.example.service.exception.DuplicateCategoryException;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class CategoryService {
@@ -18,22 +22,46 @@ public class CategoryService {
     }
 
     public CategoryResponse createCategory(CreateCategoryRequest request) {
-        Category category = categoryStore.createCategory(request);
-        return new CategoryResponse(category);
+        Optional<Category> existing = categoryStore.getCategoryByName(request.name());
+        if (existing.isPresent()) throw new DuplicateCategoryException(request.name());
+        Category category = new Category(
+                UUID.randomUUID(),
+                request.name(),
+                request.description(),
+                Instant.now(),
+                Instant.now()
+        );
+        Category saved = categoryStore.createCategory(category);
+        return new CategoryResponse(saved);
     }
 
     public CategoryResponse updateCategory(UpdateCategoryRequest request) {
-        Category updated = categoryStore.updateCategory(request);
-        return new CategoryResponse(updated);
+        Category existingOption = categoryStore.getCategory(request.categoryId()).orElseThrow(
+                () -> new CategoryNotFoundException(request.categoryId().toString()));
+
+        boolean isDuplicate = categoryStore.getCategoryByName(request.name()).isPresent();
+        if (isDuplicate) throw new DuplicateCategoryException(request.name());
+
+        Category updated = new Category(
+                existingOption.getCategoryId(),
+                request.name(),
+                request.description(),
+                existingOption.getCreatedAt(),
+                Instant.now()
+        );
+        Category saved = categoryStore.updateCategory(updated);
+        return new CategoryResponse(saved);
     }
 
     public CategoryResponse getCategory(UUID id) {
-        Category category = categoryStore.getCategory(id);
+        Category category = categoryStore.getCategory(id)
+                .orElseThrow(() -> new CategoryNotFoundException(id.toString()));
         return new CategoryResponse(category);
     }
 
     public CategoryResponse getCategory(String name) {
-        Category category = categoryStore.getCategoryByName(name);
+        Category category = categoryStore.getCategoryByName(name)
+                .orElseThrow(() -> new CategoryNotFoundException(name));
         return new CategoryResponse(category);
     }
 
