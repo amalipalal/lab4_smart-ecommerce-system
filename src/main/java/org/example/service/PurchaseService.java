@@ -2,6 +2,7 @@ package org.example.service;
 
 import org.example.dto.order.CustomerDetails;
 import org.example.dto.order.OrderRequest;
+import org.example.dto.order.OrderResponse;
 import org.example.model.Customer;
 import org.example.model.Orders;
 import org.example.model.Product;
@@ -12,8 +13,9 @@ import org.example.store.OrderStore;
 import org.example.store.ProductStore;
 
 import java.time.Instant;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class PurchaseService {
     private final OrderStore orderStore;
@@ -81,4 +83,27 @@ public class PurchaseService {
                 orderRequest.postalCode()
         );
     }
+
+    public List<OrderResponse> getPurchaseHistory(int limit, int offset) {
+        List<Orders> orders = this.orderStore.getAllOrders(limit, offset);
+        Set<UUID> customerIds = orders.stream()
+                .map(Orders::getCustomerId)
+                .collect(Collectors.toSet());
+
+        // Batch fetch specified customers from db to prevent N + 1
+        Map<UUID, Customer> customerMap = this.customerStore.findByMultipleIds(customerIds)
+                .stream()
+                .collect(Collectors.toMap(Customer::getCustomerId, Function.identity()));
+
+        return orders.stream()
+                .map(order -> {
+                    String customerEmail = customerMap.get(order.getCustomerId()).getEmail();
+                    return new OrderResponse(order, customerEmail);
+                }).toList();
+    }
+
+    public int countPurchases() {
+        return this.orderStore.countAll();
+    }
+
 }

@@ -1,5 +1,6 @@
 import org.example.dto.order.CustomerDetails;
 import org.example.dto.order.OrderRequest;
+import org.example.dto.order.OrderResponse;
 import org.example.model.Customer;
 import org.example.model.Orders;
 import org.example.model.Product;
@@ -18,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -383,4 +385,97 @@ class PurchaseServiceTest {
                 updatedProduct.getStockQuantity() == 9
         ), eq(customer));
     }
+
+    @Test
+    @DisplayName("Should get purchase history successfully")
+    void shouldGetPurchaseSuccessfully() {
+        UUID customerId1 = UUID.randomUUID();
+        UUID customerId2 = UUID.randomUUID();
+        int limit = 10;
+        int offset = 0;
+
+        Orders order1 = new Orders(
+                UUID.randomUUID(), customerId1, Instant.now(), 1500.0,
+                "Ghana", "Accra", "00233"
+        );
+        Orders order2 = new Orders(
+                UUID.randomUUID(), customerId2, Instant.now(), 800.0,
+                "Ghana", "Kumasi", "00234"
+        );
+        List<Orders> orders = List.of(order1, order2);
+
+        Customer customer1 = new Customer(
+                customerId1, "John", "Doe", "john@example.com", "+233123456789", Instant.now()
+        );
+        Customer customer2 = new Customer(
+                customerId2, "Jane", "Smith", "jane@example.com", "+233987654321", Instant.now()
+        );
+        List<Customer> customers = List.of(customer1, customer2);
+
+        when(orderStore.getAllOrders(limit, offset)).thenReturn(orders);
+        when(customerStore.findByMultipleIds(any())).thenReturn(customers);
+
+        List<OrderResponse> result = purchaseService.getPurchaseHistory(limit, offset);
+
+        Assertions.assertEquals(2, result.size());
+        verify(orderStore).getAllOrders(limit, offset);
+        verify(customerStore).findByMultipleIds(argThat(ids ->
+                ids.contains(customerId1) && ids.contains(customerId2)
+        ));
+    }
+
+    @Test
+    @DisplayName("Should get purchase history with pagination")
+    void shouldGetPurchaseHistoryWithPagination() {
+        int limit = 5;
+        int offset = 10;
+
+        when(orderStore.getAllOrders(limit, offset)).thenReturn(List.of());
+        when(customerStore.findByMultipleIds(any())).thenReturn(List.of());
+
+        purchaseService.getPurchaseHistory(limit, offset);
+
+        verify(orderStore).getAllOrders(limit, offset);
+    }
+
+    @Test
+    @DisplayName("Should batch fetch customers only once for purchase history")
+    void shouldBatchFetchCustomersOnlyOnceForPurchaseHistory() {
+        UUID customerId = UUID.randomUUID();
+        int limit = 10;
+        int offset = 0;
+
+        Orders order1 = new Orders(
+                UUID.randomUUID(), customerId, Instant.now(), 1500.0,
+                "Ghana", "Accra", "00233"
+        );
+        Orders order2 = new Orders(
+                UUID.randomUUID(), customerId, Instant.now(), 800.0,
+                "Ghana", "Kumasi", "00234"
+        );
+        List<Orders> orders = List.of(order1, order2);
+
+        Customer customer = new Customer(
+                customerId, "John", "Doe", "john@example.com", "+233123456789", Instant.now()
+        );
+
+        when(orderStore.getAllOrders(limit, offset)).thenReturn(orders);
+        when(customerStore.findByMultipleIds(any())).thenReturn(List.of(customer));
+
+        purchaseService.getPurchaseHistory(limit, offset);
+
+        verify(customerStore, times(1)).findByMultipleIds(any());
+    }
+
+    @Test
+    @DisplayName("Should count zero purchases when no orders exist")
+    void shouldCountZeroPurchasesWhenNoOrdersExist() {
+        when(orderStore.countAll()).thenReturn(0);
+
+        int result = purchaseService.countPurchases();
+
+        Assertions.assertEquals(0, result);
+        verify(orderStore).countAll();
+    }
+
 }

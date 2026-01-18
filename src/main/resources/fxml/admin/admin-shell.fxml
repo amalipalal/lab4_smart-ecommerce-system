@@ -55,6 +55,7 @@
 
             <Button fx:id="ordersBtn" text="Orders"
                     maxWidth="Infinity"
+                    onAction="#goOrders"
                     style="
                         -fx-background-color: transparent;
                         -fx-text-fill: #d1d5db;

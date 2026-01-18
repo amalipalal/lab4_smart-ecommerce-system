@@ -12,6 +12,7 @@ import org.example.model.Product;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 
 public class OrderStore {
@@ -58,5 +59,30 @@ public class OrderStore {
         this.cache.invalidateByPrefix("product:all:");
         this.cache.invalidateByPrefix("product:search:");
         this.cache.invalidateByPrefix("product:count:");
+        this.cache.invalidateByPrefix("order:all:");
+        this.cache.invalidateByPrefix("order:count");
+    }
+
+    public List<Orders> getAllOrders(int limit, int offset) {
+        try(Connection conn = dataSource.getConnection()) {
+            String key = "order:all:" + limit + ':' + offset;
+            return this.cache.getOrLoad(key, () -> this.ordersDao.getAllOrders(conn, limit, offset));
+        } catch (DAOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to search orders", e);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Database connection error", e);
+        }
+    }
+
+    public int countAll() {
+        try(Connection conn = dataSource.getConnection()) {
+            String key = "order:count";
+            return cache.getOrLoad(key, () -> ordersDao.countAll(conn));
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Database error", e);
+        }
     }
 }

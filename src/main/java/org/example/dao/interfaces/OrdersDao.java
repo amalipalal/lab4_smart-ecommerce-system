@@ -12,7 +12,11 @@ public interface OrdersDao {
 
     Optional<Orders> findById(Connection connection, UUID orderId) throws DAOException;
 
+    List<Orders> getAllOrders(Connection connection, int limit, int offset) throws DAOException;
+
     List<Orders> findByCustomer(Connection connection, UUID customerId, int limit, int offset) throws DAOException;
 
     void save(Connection connection, Orders order) throws DAOException;
+
+    int countAll(Connection conn) throws DAOException;
 }

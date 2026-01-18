@@ -20,6 +20,16 @@ public class OrderJdbcDao implements OrdersDao {
         WHERE order_id = ?
         """;
 
+    private static final String ALL_ORDERS = """
+        SELECT * FROM orders
+        ORDER BY order_date DESC
+        LIMIT ? OFFSET ?
+        """;
+
+    private static final String COUNT = """
+        SELECT COUNT(*) FROM orders
+        """;
+
     private static final String FIND_BY_CUSTOMER = """
         SELECT * FROM orders
         WHERE customer_id = ?
@@ -60,6 +70,38 @@ public class OrderJdbcDao implements OrdersDao {
                 rs.getString("shipping_city"),
                 rs.getString("shipping_postal_code")
         );
+    }
+
+    @Override
+    public List<Orders> getAllOrders(Connection connection, int limit, int offset) throws DAOException {
+        List<Orders> orders = new ArrayList<>();
+        try(PreparedStatement ps = connection.prepareStatement(ALL_ORDERS)) {
+            ps.setInt(1, limit);
+            ps.setInt(2, offset);
+            try(ResultSet resultSet = ps.executeQuery()) {
+                while (resultSet.next()) {
+                    orders.add(map(resultSet));
+                }
+            }
+        } catch ( SQLException e) {
+            throw new DAOException("Failed to search orders by name", e);
+        }
+
+        return orders;
+    }
+
+    @Override
+    public int countAll(Connection conn) throws DAOException {
+        try (PreparedStatement ps = conn.prepareStatement(COUNT)) {
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+                return 0;
+            }
+        } catch (SQLException e) {
+            throw new DAOException("Failed to count orders by name", e);
+        }
     }
 
     @Override

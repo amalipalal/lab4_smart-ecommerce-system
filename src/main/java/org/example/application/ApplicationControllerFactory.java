@@ -1,6 +1,7 @@
 package org.example.application;
 
 import javafx.util.Callback;
+import org.example.controller.order.AdminOrderController;
 import org.example.controller.shell.BuyerShellController;
 import org.example.controller.category.AdminCategoryController;
 import org.example.controller.product.AdminProductController;
@@ -18,7 +19,9 @@ public class ApplicationControllerFactory implements Callback<Class<?>, Object> 
         if (cls == AdminCategoryController.class) {
             return new AdminCategoryController(context.getCategoryService());
         } else if (cls == AdminProductController.class) {
-            return new AdminProductController(context.getProductService(),context.getCategoryService());
+            return new AdminProductController(context.getProductService(), context.getCategoryService());
+        } else if (cls == AdminOrderController.class) {
+            return new AdminOrderController(context.getPurchaseService());
         } else if (cls == BuyerShellController.class) {
             return new BuyerShellController(
                     context.getProductService(),

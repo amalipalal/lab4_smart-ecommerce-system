@@ -31,6 +31,13 @@ public class AdminShellController {
     }
 
     @FXML
+    private void goOrders() {
+        contentArea.getChildren().setAll(
+                Router.loadAdminContent("admin-order.fxml")
+        );
+    }
+
+    @FXML
     private void goBuyer() {
         Router.goToBuyer();
     }

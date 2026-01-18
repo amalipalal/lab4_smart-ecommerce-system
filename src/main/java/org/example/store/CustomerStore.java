@@ -8,7 +8,10 @@ import org.example.model.Customer;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 public class CustomerStore {
     private final DataSource dataSource;
@@ -26,6 +29,24 @@ public class CustomerStore {
             String key = "customer:" +  email;
             return this.cache.getOrLoad(key, () -> this.customerDao.findByEmail(conn, email));
         } catch (SQLException | DAOException e) {
+            throw new RuntimeException("Database error", e);
+        }
+    }
+
+    public Optional<Customer> findById(UUID id) {
+        try(Connection conn = dataSource.getConnection()) {
+            String key = "customer:" + id;
+            return this.cache.getOrLoad(key, () -> this.customerDao.findById(conn, id));
+        } catch (DAOException | SQLException e) {
+            throw new RuntimeException("Database error", e);
+        }
+    }
+
+    public List<Customer> findByMultipleIds(Set<UUID> ids) {
+        try(Connection conn = dataSource.getConnection()) {
+            String key = "customer:multiple:" + ids.hashCode();
+            return this.cache.getOrLoad(key, () -> this.customerDao.findByIds(conn, ids));
+        } catch (DAOException | SQLException e) {
             throw new RuntimeException("Database error", e);
         }
     }

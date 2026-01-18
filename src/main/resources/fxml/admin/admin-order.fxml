@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<VBox xmlns="http://javafx.com/javafx/21.0.2"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.controller.order.AdminOrderController"
+      spacing="20"
+      style="
+          -fx-padding: 30;
+          -fx-font-family: 'Inter', 'Segoe UI', sans-serif;
+          -fx-background-color: transparent;
+      ">
+
+    <VBox style="
+        -fx-background-color: white;
+        -fx-padding: 20;
+        -fx-spacing: 10px;
+        -fx-background-radius: 12;
+        -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 4);
+    ">
+
+        <Label text="Orders"
+               style="
+                   -fx-font-size: 14px;
+                   -fx-font-weight: bold;
+               "/>
+
+        <TableView fx:id="orderTable"
+                   style="-fx-border-color: transparent;">
+            <columns>
+                <TableColumn text="ID" fx:id="idColumn"/>
+                <TableColumn text="Customer" fx:id="customerColumn"/>
+                <TableColumn text="Total" fx:id="totalColumn"/>
+                <TableColumn text="Date" fx:id="dateColumn"/>
+                <TableColumn text="Shipping" fx:id="shippingColumn"/>
+            </columns>
+        </TableView>
+
+        <Pagination fx:id="pagination"
+                    maxPageIndicatorCount="5"
+                    style="
+                            -fx-page-information-visible: false;
+                            -fix-padding: 12 0 0 0;
+                        "/>
+
+    </VBox>
+</VBox>
