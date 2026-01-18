@@ -9,14 +9,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class CustomerJdbcDao implements CustomerDao {
 
     private static final String FIND_BY_ID = """
             SELECT * FROM customer
             WHERE customer_id = ?
+            """;
+
+    private static final String FIND_BY_MULTIPLE_IDS = """
+            SELECT * FROM customer
+            WHERE customer_id IN 
             """;
 
     private static final String FIND_BY_EMAIL = """
@@ -58,6 +62,28 @@ public class CustomerJdbcDao implements CustomerDao {
                 resultSet.getString("phone"),
                 resultSet.getTimestamp("created_at").toInstant()
         );
+    }
+
+    @Override
+    public List<Customer> findByIds(Connection conn, Set<UUID> customerIds) {
+        String placeholders = String.join(", ", Collections.nCopies(customerIds.size(), "? "));
+        String sql = FIND_BY_MULTIPLE_IDS + "(" + placeholders + ")";
+        try(PreparedStatement ps = conn.prepareStatement(sql)) {
+            int index = 1;
+            for(UUID id : customerIds)
+                ps.setObject(index++, id);
+
+            try(ResultSet rs = ps.executeQuery()) {
+                List<Customer> customers = new ArrayList<>();
+                while(rs.next())
+                    customers.add(map(rs));
+
+                return customers;
+            }
+
+        } catch (SQLException e) {
+            throw new DAOException("Failed to find customers by IDs", e);
+        }
     }
 
     @Override
