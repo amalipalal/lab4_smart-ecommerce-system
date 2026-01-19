@@ -5,7 +5,7 @@ import org.example.model.Category;
 import org.example.service.CategoryService;
 import org.example.service.exception.CategoryNotFoundException;
 import org.example.service.exception.DuplicateCategoryException;
-import org.example.store.CategoryStore;
+import org.example.store.category.CategoryStore;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

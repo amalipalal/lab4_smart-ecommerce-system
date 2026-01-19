@@ -6,7 +6,7 @@ import org.example.model.Product;
 import org.example.model.ProductFilter;
 import org.example.service.ProductService;
 import org.example.service.exception.ProductNotFoundException;
-import org.example.store.ProductStore;
+import org.example.store.product.ProductStore;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
