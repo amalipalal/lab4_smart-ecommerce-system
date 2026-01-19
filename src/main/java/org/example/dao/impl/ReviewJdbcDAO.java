@@ -1,14 +1,12 @@
 package org.example.dao.impl;
 
-import org.example.config.DBConnection;
 import org.example.dao.interfaces.ReviewDAO;
 import org.example.dao.interfaces.StatementPreparer;
 import org.example.dao.exception.DAOException;
 import org.example.model.Review;
-import org.example.config.exception.DatabaseConnectionException;
 
 import java.sql.*;
-        import java.util.ArrayList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,13 +33,12 @@ public class ReviewJdbcDAO implements ReviewDAO {
         """;
 
     @Override
-    public List<Review> findByProduct(UUID productId, int limit, int offset)
+    public List<Review> findByProduct(Connection conn, UUID productId, int limit, int offset)
             throws DAOException {
 
         List<Review> reviews = new ArrayList<>();
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(FIND_BY_PRODUCT)) {
+        try (PreparedStatement ps = conn.prepareStatement(FIND_BY_PRODUCT)) {
 
             ps.setObject(1, productId);
             ps.setInt(2, limit);
@@ -52,16 +49,16 @@ public class ReviewJdbcDAO implements ReviewDAO {
                     reviews.add(map(rs));
                 }
             }
-        } catch (SQLException | DatabaseConnectionException e) {
+        } catch (SQLException e) {
             throw new DAOException("Failed to fetch reviews for product " + productId, e);
         }
         return reviews;
     }
 
     @Override
-    public void save(Review review) throws DAOException {
+    public void save(Connection conn, Review review) throws DAOException {
         try {
-            insertionQuery(SAVE, ps -> {
+            insertionQuery(conn, SAVE, ps -> {
                 ps.setObject(1, review.getReviewId());
                 ps.setObject(2, review.getProductId());
                 ps.setObject(3, review.getCustomerId());
@@ -69,16 +66,16 @@ public class ReviewJdbcDAO implements ReviewDAO {
                 ps.setString(5, review.getComment());
                 ps.setTimestamp(6, Timestamp.from(review.getCreatedAt()));
             });
-        } catch (SQLException | DatabaseConnectionException e) {
+        } catch (SQLException e) {
             throw new DAOException("Failed to save review", e);
         }
     }
 
     @Override
-    public void delete(UUID reviewId) throws DAOException {
+    public void delete(Connection conn, UUID reviewId) throws DAOException {
         try {
-            insertionQuery(DELETE, ps -> ps.setObject(1, reviewId));
-        } catch (SQLException | DatabaseConnectionException e) {
+            insertionQuery(conn, DELETE, ps -> ps.setObject(1, reviewId));
+        } catch (SQLException e) {
             throw new DAOException("Failed to delete review " + reviewId, e);
         }
     }
@@ -94,12 +91,10 @@ public class ReviewJdbcDAO implements ReviewDAO {
         );
     }
 
-    private void insertionQuery(String sql, StatementPreparer preparer)
-            throws SQLException, DatabaseConnectionException {
+    private void insertionQuery(Connection conn, String sql, StatementPreparer preparer)
+            throws SQLException {
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             preparer.prepare(ps);
             ps.executeUpdate();
         }
