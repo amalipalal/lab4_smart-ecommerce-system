@@ -1,10 +1,13 @@
-package org.example.store;
+package org.example.store.product;
 
-import org.example.cache.ProductCache;
+import org.example.cache.ApplicationCache;
 import org.example.config.DataSource;
+import org.example.config.exception.DatabaseConnectionException;
+import org.example.dao.exception.DAOException;
 import org.example.dao.interfaces.ProductDao;
 import org.example.model.Product;
 import org.example.model.ProductFilter;
+import org.example.store.product.exception.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -14,10 +17,10 @@ import java.util.UUID;
 
 public class ProductStore {
     private final DataSource dataSource;
-    private final ProductCache cache;
+    private final ApplicationCache cache;
     private final ProductDao productDao;
 
-    public ProductStore(DataSource dataSource, ProductCache cache, ProductDao productDao) {
+    public ProductStore(DataSource dataSource, ApplicationCache cache, ProductDao productDao) {
         this.dataSource = dataSource;
         this.cache = cache;
         this.productDao = productDao;
@@ -31,12 +34,12 @@ public class ProductStore {
                 conn.commit();
                 invalidateAllProductCache();
                 return product;
-            } catch (Exception e) {
+            } catch (DAOException e) {
                 conn.rollback();
-                throw new RuntimeException("Failed to create product.", e);
+                throw new ProductCreationException(product.getName());
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Database error", e);
+            throw new DatabaseConnectionException(e);
         }
     }
 
@@ -48,12 +51,12 @@ public class ProductStore {
                 conn.commit();
                 invalidateAllProductCache();
                 return product;
-            } catch (Exception e) {
+            } catch (DAOException e) {
                 conn.rollback();
-                throw new RuntimeException("Failed to update product.", e);
+                throw new ProductUpdateException(product.getProductId().toString());
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Database error", e);
+            throw new DatabaseConnectionException(e);
         }
     }
 
@@ -64,12 +67,12 @@ public class ProductStore {
                 this.productDao.deleteById(conn, productId);
                 conn.commit();
                 invalidateAllProductCache();
-            } catch (Exception e) {
+            } catch (DAOException e) {
                 conn.rollback();
-                throw new RuntimeException("Failed to delete product.", e);
+                throw new DeleteProductException(productId.toString());
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Database error", e);
+            throw new DatabaseConnectionException(e);
         }
     }
 
@@ -77,8 +80,10 @@ public class ProductStore {
         try (Connection conn = dataSource.getConnection()) {
             String key = "product:" + productId.toString();
             return this.cache.getOrLoad(key, () -> this.productDao.findById(conn, productId));
+        } catch (DAOException e) {
+            throw new ProductRetrievalException(productId.toString());
         } catch (SQLException e) {
-            throw new RuntimeException("Database error", e);
+            throw new DatabaseConnectionException(e);
         }
     }
 
@@ -86,8 +91,10 @@ public class ProductStore {
         try (Connection conn = dataSource.getConnection()) {
             String key = "product:search:" + filter.hashCode() + limit + offset;
             return this.cache.getOrLoad(key, () -> this.productDao.findFiltered(conn, filter, limit, offset));
+        } catch (DAOException e) {
+            throw new ProductSearchException("Failed to search with filter");
         } catch (SQLException e) {
-            throw new RuntimeException("Database error", e);
+            throw new DatabaseConnectionException(e);
         }
     }
 
@@ -95,8 +102,10 @@ public class ProductStore {
         try (Connection conn = dataSource.getConnection()) {
             String key = "product:count:" + filter.hashCode();
             return this.cache.getOrLoad(key, () -> this.productDao.countFiltered(conn, filter));
+        } catch (DAOException e) {
+            throw new ProductSearchException("Failed to count search results with filter");
         } catch (SQLException e) {
-            throw new RuntimeException("Database error", e);
+            throw new DatabaseConnectionException(e);
         }
     }
 

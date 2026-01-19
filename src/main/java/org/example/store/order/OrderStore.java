@@ -1,7 +1,8 @@
-package org.example.store;
+package org.example.store.order;
 
-import org.example.cache.ProductCache;
+import org.example.cache.ApplicationCache;
 import org.example.config.DataSource;
+import org.example.config.exception.DatabaseConnectionException;
 import org.example.dao.exception.DAOException;
 import org.example.dao.interfaces.CustomerDao;
 import org.example.dao.interfaces.OrdersDao;
@@ -9,6 +10,9 @@ import org.example.dao.interfaces.ProductDao;
 import org.example.model.Customer;
 import org.example.model.Orders;
 import org.example.model.Product;
+import org.example.store.order.exception.OrderPlacementException;
+import org.example.store.order.exception.OrderRetrievalException;
+import org.example.store.order.exception.OrderCountException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -17,12 +21,12 @@ import java.util.UUID;
 
 public class OrderStore {
     private final DataSource dataSource;
-    private final ProductCache cache;
+    private final ApplicationCache cache;
     private final CustomerDao customerDao;
     private final ProductDao productDao;
     private final OrdersDao ordersDao;
 
-    public OrderStore(DataSource dataSource, ProductCache cache, CustomerDao customerDao, ProductDao productDao, OrdersDao ordersDao) {
+    public OrderStore(DataSource dataSource, ApplicationCache cache, CustomerDao customerDao, ProductDao productDao, OrdersDao ordersDao) {
         this.dataSource = dataSource;
         this.cache = cache;
         this.customerDao = customerDao;
@@ -45,12 +49,10 @@ public class OrderStore {
                 invalidateCache(product.getProductId());
             } catch (DAOException e) {
                 conn.rollback();
-                e.printStackTrace();
-                throw new RuntimeException("Failed to place order");
+                throw new OrderPlacementException(order.getOrderId().toString());
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Database error", e);
+            throw new DatabaseConnectionException(e);
         }
     }
 
@@ -68,11 +70,9 @@ public class OrderStore {
             String key = "order:all:" + limit + ':' + offset;
             return this.cache.getOrLoad(key, () -> this.ordersDao.getAllOrders(conn, limit, offset));
         } catch (DAOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to search orders", e);
+            throw new OrderRetrievalException("all");
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Database connection error", e);
+            throw new DatabaseConnectionException(e);
         }
     }
 
@@ -80,9 +80,10 @@ public class OrderStore {
         try(Connection conn = dataSource.getConnection()) {
             String key = "order:count";
             return cache.getOrLoad(key, () -> ordersDao.countAll(conn));
+        } catch (DAOException e) {
+            throw new OrderCountException("count");
         } catch (SQLException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Database error", e);
+            throw new DatabaseConnectionException(e);
         }
     }
 }

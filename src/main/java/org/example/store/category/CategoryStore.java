@@ -1,9 +1,15 @@
-package org.example.store;
+package org.example.store.category;
 
-import org.example.cache.ProductCache;
+import org.example.cache.ApplicationCache;
 import org.example.config.DataSource;
+import org.example.config.exception.DatabaseConnectionException;
+import org.example.dao.exception.DAOException;
 import org.example.dao.interfaces.CategoryDao;
 import org.example.model.Category;
+import org.example.store.category.exception.CategoryCreationException;
+import org.example.store.category.exception.CategoryRetrievalException;
+import org.example.store.category.exception.CategorySearchException;
+import org.example.store.category.exception.CategoryUpdateException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -13,10 +19,10 @@ import java.util.UUID;
 
 public class CategoryStore {
     private final DataSource dataSource;
-    private final ProductCache cache;
+    private final ApplicationCache cache;
     private final CategoryDao categoryDao;
 
-    public CategoryStore(DataSource dataSource, ProductCache cache, CategoryDao categoryDao) {
+    public CategoryStore(DataSource dataSource, ApplicationCache cache, CategoryDao categoryDao) {
         this.dataSource = dataSource;
         this.cache = cache;
         this.categoryDao = categoryDao;
@@ -30,12 +36,12 @@ public class CategoryStore {
                 conn.commit();
                 cache.invalidateByPrefix("category:");
                 return category;
-            } catch (Exception e) {
+            } catch (DAOException e) {
                 conn.rollback();
-                throw e;
+                throw new CategoryCreationException(category.getName());
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Database error", e);
+            throw new DatabaseConnectionException(e);
         }
     }
 
@@ -47,12 +53,12 @@ public class CategoryStore {
                 conn.commit();
                 cache.invalidateByPrefix("category:");
                 return category;
-            } catch (Exception e) {
+            } catch (DAOException e) {
                 conn.rollback();
-                throw e;
+                throw new CategoryUpdateException(category.getCategoryId().toString());
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Database error", e);
+            throw new DatabaseConnectionException(e);
         }
     }
 
@@ -60,8 +66,10 @@ public class CategoryStore {
         try (Connection conn = dataSource.getConnection()) {
             String key = "category:" + id;
             return cache.getOrLoad(key, () -> categoryDao.findById(conn, id));
+        } catch (DAOException e) {
+            throw new CategoryRetrievalException(id.toString());
         } catch (SQLException e) {
-            throw new RuntimeException("Database error", e);
+            throw new DatabaseConnectionException(e);
         }
     }
 
@@ -69,8 +77,10 @@ public class CategoryStore {
         try (Connection conn = dataSource.getConnection()) {
             String key = "category:name:" + name;
             return cache.getOrLoad(key, () -> categoryDao.findByName(conn, name));
+        } catch (DAOException e) {
+            throw new CategoryRetrievalException(name);
         } catch (SQLException e) {
-            throw new RuntimeException("Database error", e);
+            throw new DatabaseConnectionException(e);
         }
     }
 
@@ -78,8 +88,10 @@ public class CategoryStore {
         try (Connection conn = dataSource.getConnection()) {
             String key = "category:search:" + query + ":" + limit + ":" + offset;
             return cache.getOrLoad(key, () -> categoryDao.searchByName(conn, query, limit, offset));
+        } catch (DAOException e) {
+            throw new CategorySearchException("Failed to search categories");
         } catch (SQLException e) {
-            throw new RuntimeException("Database error", e);
+            throw new DatabaseConnectionException(e);
         }
     }
 
@@ -87,8 +99,10 @@ public class CategoryStore {
         try (Connection conn = dataSource.getConnection()) {
             String key = "category:all:" + limit + ":" + offset;
             return cache.getOrLoad(key, () -> categoryDao.findAll(conn, limit, offset));
+        } catch (DAOException e) {
+            throw new CategoryRetrievalException("all");
         } catch (SQLException e) {
-            throw new RuntimeException("Database error", e);
+            throw new DatabaseConnectionException(e);
         }
     }
 
@@ -96,8 +110,10 @@ public class CategoryStore {
         try (Connection conn = dataSource.getConnection()) {
             String key = "category:count";
             return cache.getOrLoad(key, () -> categoryDao.count(conn));
+        } catch (DAOException e) {
+            throw new CategorySearchException("Failed to count categories");
         } catch (SQLException e) {
-            throw new RuntimeException("Database error", e);
+            throw new DatabaseConnectionException(e);
         }
     }
 
@@ -105,8 +121,10 @@ public class CategoryStore {
         try (Connection conn = dataSource.getConnection()) {
             String key = "category:count:" + query;
             return cache.getOrLoad(key, () -> categoryDao.countByName(conn, query));
+        } catch (DAOException e) {
+            throw new CategorySearchException("Failed to count categories by name");
         } catch (SQLException e) {
-            throw new RuntimeException("Database error", e);
+            throw new DatabaseConnectionException(e);
         }
     }
 }
