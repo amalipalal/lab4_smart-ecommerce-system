@@ -6,7 +6,7 @@ import org.example.application.ApplicationContext;
 import org.example.application.ApplicationControllerFactory;
 import org.example.ui.Router;
 
-public class Main extends Application {
+public class EcommerceApplication extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         ApplicationContext context = ApplicationContext.getInstance();
