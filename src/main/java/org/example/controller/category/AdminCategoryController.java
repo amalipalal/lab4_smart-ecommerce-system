@@ -118,7 +118,7 @@ public class AdminCategoryController {
             categories.addAll(result);
             categoryTable.setItems(categories);
         } catch (Exception e) {
-            showError("Failed to load categories", "Could not fetcch categories form te database.");
+            showError("Failed to load categories", e.getMessage());
         }
     }
 

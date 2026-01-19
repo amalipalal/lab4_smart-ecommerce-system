@@ -128,7 +128,7 @@ public class AdminProductController {
             productService.deleteProduct(product.productId());
             refreshPagination();
         } catch (Exception e) {
-            DialogUtil.showError("Error", "Failed to delete product");
+            DialogUtil.showError("Error", e.getMessage());
         }
     }
 
