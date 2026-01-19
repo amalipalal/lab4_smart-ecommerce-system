@@ -7,7 +7,7 @@ import org.example.dto.product.UpdateProductRequest;
 import org.example.model.Product;
 import org.example.model.ProductFilter;
 import org.example.service.exception.ProductNotFoundException;
-import org.example.store.ProductStore;
+import org.example.store.product.ProductStore;
 
 import java.time.Instant;
 import java.util.List;

@@ -8,9 +8,9 @@ import org.example.model.Orders;
 import org.example.model.Product;
 import org.example.service.exception.InsufficientProductStock;
 import org.example.service.exception.ProductNotFoundException;
-import org.example.store.CustomerStore;
-import org.example.store.OrderStore;
-import org.example.store.ProductStore;
+import org.example.store.customer.CustomerStore;
+import org.example.store.order.OrderStore;
+import org.example.store.product.ProductStore;
 
 import java.time.Instant;
 import java.util.*;

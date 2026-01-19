@@ -4,8 +4,8 @@ import org.example.dto.review.CreateReviewRequest;
 import org.example.dto.review.ReviewResponse;
 import org.example.model.Review;
 import org.example.service.exception.CustomerNotFoundException;
-import org.example.store.CustomerStore;
-import org.example.store.ReviewStore;
+import org.example.store.customer.CustomerStore;
+import org.example.store.review.ReviewStore;
 
 import java.time.Instant;
 import java.util.List;
@@ -22,7 +22,7 @@ public class ReviewService {
 
     public ReviewResponse createReview(CreateReviewRequest request) {
         var customer = customerStore.findByEmail(request.email())
-                .orElseThrow(() -> new CustomerNotFoundException("Customer with email " + request.email() + " not found"));
+                .orElseThrow(() -> new CustomerNotFoundException(request.email()));
 
         Review review = new Review(
                 UUID.randomUUID(),
