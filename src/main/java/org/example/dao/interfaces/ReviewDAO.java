@@ -11,7 +11,7 @@ public interface ReviewDAO {
 
     List<Review> findByProduct(Connection connection, UUID productId, int limit, int offset) throws DAOException;
 
-    void save(Review review) throws DAOException;
+    int countByProduct(Connection connection, UUID productId) throws DAOException;
 
     void save(Connection connection, Review review) throws DAOException;
 

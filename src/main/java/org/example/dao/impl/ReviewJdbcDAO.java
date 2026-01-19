@@ -19,6 +19,11 @@ public class ReviewJdbcDAO implements ReviewDAO {
         LIMIT ? OFFSET ?
         """;
 
+    private static final String COUNT_BY_PRODUCT = """
+        SELECT COUNT(*) FROM review
+        WHERE product_id = ?
+        """;
+
     private static final String SAVE = """
         INSERT INTO review (
             review_id, product_id, customer_id,
@@ -97,6 +102,21 @@ public class ReviewJdbcDAO implements ReviewDAO {
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             preparer.prepare(ps);
             ps.executeUpdate();
+        }
+    }
+
+    @Override
+    public int countByProduct(Connection conn, UUID productId) throws DAOException {
+        try (PreparedStatement ps = conn.prepareStatement(COUNT_BY_PRODUCT)) {
+            ps.setObject(1, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+                return 0;
+            }
+        } catch (SQLException e) {
+            throw new DAOException("Failed to count reviews by product", e);
         }
     }
 }
