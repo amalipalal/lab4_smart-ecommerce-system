@@ -16,11 +16,13 @@ import org.example.model.ProductFilter;
 import org.example.service.CategoryService;
 import org.example.service.PurchaseService;
 import org.example.service.ProductService;
+import org.example.service.ReviewService;
 import org.example.ui.ActionCell;
 import org.example.ui.ActionDefinition;
 import org.example.ui.Router;
 import org.example.util.DialogUtil;
 import org.example.util.FormatUtil;
+import org.example.controller.product.ReviewModalController;
 
 import java.util.List;
 
@@ -47,6 +49,7 @@ public class BuyerShellController {
     private final ProductService productService;
     private final CategoryService categoryService;
     private final PurchaseService purchaseService;
+    private final ReviewService reviewService;
     private final ObservableList<ProductResponse> products = FXCollections.observableArrayList();
     private final ObservableList<CategoryResponse> categories = FXCollections.observableArrayList();
 
@@ -55,11 +58,14 @@ public class BuyerShellController {
     public BuyerShellController(
             ProductService productService,
             CategoryService categoryService,
-            PurchaseService purchaseService
+            PurchaseService purchaseService,
+            ReviewService reviewService
     ) {
         this.productService = productService;
         this.categoryService = categoryService;
         this.purchaseService = purchaseService;
+        this.reviewService = reviewService;
+
     }
 
     @FXML
@@ -99,7 +105,7 @@ public class BuyerShellController {
                                 "fas-comments",
                                 14,
                                 "icon-btn",
-                                null
+                                this::handleViewReviews
                         )
                 )
         ));
@@ -210,6 +216,25 @@ public class BuyerShellController {
         } catch (Exception e) {
             DialogUtil.showError("Failed to initiate purchase", e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    private void handleViewReviews(ProductResponse product) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/buyer/review-modal.fxml"));
+            ReviewModalController controller = new ReviewModalController(reviewService);
+            loader.setController(controller);
+
+            Stage modal = new Stage();
+            modal.setTitle("Product Reviews - " + product.name());
+            modal.setScene(new Scene(loader.load()));
+            modal.initModality(Modality.APPLICATION_MODAL);
+
+            controller.setProduct(product.productId());
+            modal.showAndWait();
+        } catch (Exception e) {
+            e.printStackTrace();
+            DialogUtil.showError("Error", "Failed to open reviews");
         }
     }
 
