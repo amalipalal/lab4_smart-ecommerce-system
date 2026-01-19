@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class ProductCache {
+public class ApplicationCache {
     private final Map<String, Object> cache = new HashMap<>();
 
     @SuppressWarnings("unchecked")
