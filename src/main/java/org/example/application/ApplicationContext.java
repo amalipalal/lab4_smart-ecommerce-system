@@ -4,12 +4,16 @@ import org.example.config.DataSource;
 import org.example.config.DatabaseConfig;
 import org.example.dao.impl.*;
 import org.example.dao.interfaces.*;
-import org.example.cache.ProductCache;
+import org.example.cache.ApplicationCache;
 import org.example.service.CategoryService;
 import org.example.service.PurchaseService;
 import org.example.service.ProductService;
 import org.example.service.ReviewService;
-import org.example.store.*;
+import org.example.store.category.CategoryStore;
+import org.example.store.customer.CustomerStore;
+import org.example.store.order.OrderStore;
+import org.example.store.product.ProductStore;
+import org.example.store.review.ReviewStore;
 
 public class ApplicationContext {
 
@@ -23,7 +27,7 @@ public class ApplicationContext {
         DataSource dataSource = new DataSource(DatabaseConfig.DB_URL,
                 DatabaseConfig.DB_USER, DatabaseConfig.DB_PASSWORD);
 
-        var cache = new ProductCache();
+        var cache = new ApplicationCache();
 
         CustomerDao customerDao = new CustomerJdbcDao();
         ProductDao productDao = new ProductJdbcDao();
