@@ -14,17 +14,19 @@ import java.util.UUID;
 public class CategoryJdbcDao implements CategoryDao {
 
     private static  final String FIND_BY_ID = """
-            SELECT * FROM category
+            SELECT category_id, name, description, created_at, updated_at
+            FROM category
             WHERE category_id = ?
             """;
 
     private static final String FIND_BY_NAME = """
-            SELECT * FROM category
+            SELECT category_id, name, description, created_at, updated_at
+            FROM category
             WHERE name = ?
             """;
 
     private static final String SEARCH_BY_NAME = """
-            SELECT *
+            SELECT category_id, name, description, created_at, updated_at
             FROM category
             WHERE LOWER(name) LIKE LOWER(?)
             ORDER BY name ASC
@@ -38,7 +40,8 @@ public class CategoryJdbcDao implements CategoryDao {
         """;
 
     private static final String FIND_ALL = """
-            SELECT * FROM category
+            SELECT category_id, name, description, created_at, updated_at
+            FROM category
             ORDER BY name ASC
             LIMIT ? OFFSET ?
             """;

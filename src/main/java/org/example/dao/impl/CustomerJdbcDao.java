@@ -14,17 +14,20 @@ import java.util.*;
 public class CustomerJdbcDao implements CustomerDao {
 
     private static final String FIND_BY_ID = """
-            SELECT * FROM customer
+            SELECT customer_id, first_name, last_name, email, phone, created_at
+            FROM customer
             WHERE customer_id = ?
             """;
 
     private static final String FIND_BY_MULTIPLE_IDS = """
-            SELECT * FROM customer
+            SELECT customer_id, first_name, last_name, email, phone, created_at
+            FROM customer
             WHERE customer_id IN 
             """;
 
     private static final String FIND_BY_EMAIL = """
-            SELECT * FROM customer
+            SELECT customer_id, first_name, last_name, email, phone, created_at
+            FROM customer
             WHERE email = ?
             """;
 

@@ -36,3 +36,15 @@ As a result, an implementation with a db cache offers significantly better resul
 
 **Question:** How much does optimizing sql queries improve retrieval and search speed?
 
+### Results
+
+#### Prior to optimization
+
+![img.png](sql-not-optimized.png)
+*Query to retrieve all products in a particular category*
+
+
+#### After optimization
+
+![img_1.png](sql-optimized.png)
+*Query to retrieve all products in a particular category*
