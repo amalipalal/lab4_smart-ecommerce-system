@@ -10,7 +10,7 @@ NB: Cache being used is a db cache to cache database results
 
 #### Without Cache:
 
-![img.png](results-uncached.png)
+![img.png](images/results-uncached.png)
 
 Here, the average speed when retrieving all products is:
 
@@ -18,7 +18,7 @@ $ \dfrac{3 + 0 + 2 + 3 + 3}{5} = \dfrac{11}{5} \approx 2.2ms$
 
 #### With Cache:
 
-![img_1.png](results-cached.png)
+![img_1.png](images/results-cached.png)
 
 Here, the average speed when retrieving all products is:
 
@@ -40,11 +40,11 @@ As a result, an implementation with a db cache offers significantly better resul
 
 #### Prior to optimization
 
-![img.png](sql-not-optimized.png)
+![img.png](images/sql-not-optimized.png)
 *Query to retrieve all products in a particular category*
 
 
 #### After optimization
 
-![img_1.png](sql-optimized.png)
+![img_1.png](images/sql-optimized.png)
 *Query to retrieve all products in a particular category*
