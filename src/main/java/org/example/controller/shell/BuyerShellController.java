@@ -185,7 +185,7 @@ public class BuyerShellController {
             products.addAll(result);
             productTable.setItems(products);
         } catch (Exception e) {
-            DialogUtil.showError("Error", "Failed to load products");
+            DialogUtil.showError("Error", e.getMessage());
         }
     }
 
