@@ -28,6 +28,17 @@ public class CategoryStore {
         this.categoryDao = categoryDao;
     }
 
+    /**
+     * Persist a new {@link org.example.model.Category} within a transaction.
+     *
+     * Delegates to {@link org.example.dao.interfaces.CategoryDao#save(java.sql.Connection, org.example.model.Category)}
+     * and invalidates category-related cache prefixes on success.
+     *
+     * @param category the category to create
+     * @return the persisted {@link Category}
+     * @throws org.example.store.category.exception.CategoryCreationException when DAO persistence fails
+     * @throws org.example.config.exception.DatabaseConnectionException when a DB connection cannot be obtained
+     */
     public Category createCategory(Category category) {
         try (Connection conn = dataSource.getConnection()) {
             conn.setAutoCommit(false);
@@ -45,6 +56,17 @@ public class CategoryStore {
         }
     }
 
+    /**
+     * Update an existing {@link org.example.model.Category} inside a transaction.
+     *
+     * Delegates to {@link org.example.dao.interfaces.CategoryDao#update(java.sql.Connection, org.example.model.Category)}
+     * and invalidates category cache on success.
+     *
+     * @param category the category with updated fields
+     * @return the updated {@link Category}
+     * @throws org.example.store.category.exception.CategoryUpdateException when DAO update fails
+     * @throws org.example.config.exception.DatabaseConnectionException when a DB connection cannot be obtained
+     */
     public Category updateCategory(Category category) {
         try (Connection conn = dataSource.getConnection()) {
             conn.setAutoCommit(false);
@@ -62,6 +84,17 @@ public class CategoryStore {
         }
     }
 
+    /**
+     * Load a category by id.
+     *
+     * Uses {@link org.example.dao.interfaces.CategoryDao#findById(java.sql.Connection, java.util.UUID)}
+     * and caches the result via {@link org.example.application.ApplicationCache#getOrLoad}.
+     *
+     * @param id category identifier
+     * @return an {@link Optional} containing the Category when found
+     * @throws org.example.store.category.exception.CategoryRetrievalException when DAO retrieval fails
+     * @throws org.example.config.exception.DatabaseConnectionException when a DB connection cannot be obtained
+     */
     public Optional<Category> getCategory(UUID id) {
         try (Connection conn = dataSource.getConnection()) {
             String key = "category:" + id;
@@ -73,6 +106,17 @@ public class CategoryStore {
         }
     }
 
+    /**
+     * Load a category by name.
+     *
+     * Uses {@link org.example.dao.interfaces.CategoryDao#findByName(java.sql.Connection, String)}
+     * and caches the result.
+     *
+     * @param name category name
+     * @return an {@link Optional} containing the Category when found
+     * @throws org.example.store.category.exception.CategoryRetrievalException when DAO retrieval fails
+     * @throws org.example.config.exception.DatabaseConnectionException when a DB connection cannot be obtained
+     */
     public Optional<Category> getCategoryByName(String name) {
         try (Connection conn = dataSource.getConnection()) {
             String key = "category:name:" + name;
@@ -84,6 +128,19 @@ public class CategoryStore {
         }
     }
 
+    /**
+     * Search categories by name with simple paging.
+     *
+     * Delegates to {@link org.example.dao.interfaces.CategoryDao#searchByName(java.sql.Connection, String, int, int)}
+     * and caches the result.
+     *
+     * @param query substring to search for
+     * @param limit maximum results
+     * @param offset zero-based offset
+     * @return list of matching {@link Category}
+     * @throws org.example.store.category.exception.CategorySearchException when DAO search fails
+     * @throws org.example.config.exception.DatabaseConnectionException when a DB connection cannot be obtained
+     */
     public List<Category> searchByName(String query, int limit, int offset) {
         try (Connection conn = dataSource.getConnection()) {
             String key = "category:search:" + query + ":" + limit + ":" + offset;
@@ -95,6 +152,18 @@ public class CategoryStore {
         }
     }
 
+    /**
+     * Retrieve a page of all categories.
+     *
+     * Results are loaded via {@link org.example.dao.interfaces.CategoryDao#findAll(java.sql.Connection, int, int)}
+     * and cached through {@link org.example.application.ApplicationCache#getOrLoad}.
+     *
+     * @param limit  maximum number of categories to return
+     * @param offset zero-based offset for paging
+     * @return list of {@link Category} for the requested page
+     * @throws org.example.store.category.exception.CategoryRetrievalException when DAO retrieval fails
+     * @throws org.example.config.exception.DatabaseConnectionException when a DB connection cannot be obtained
+     */
     public List<Category> findAll(int limit, int offset) {
         try (Connection conn = dataSource.getConnection()) {
             String key = "category:all:" + limit + ":" + offset;

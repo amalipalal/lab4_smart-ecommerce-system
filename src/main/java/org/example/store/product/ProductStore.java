@@ -26,6 +26,17 @@ public class ProductStore {
         this.productDao = productDao;
     }
 
+    /**
+     * Persist a new {@link org.example.model.Product} inside a transaction.
+     *
+     * Delegates to {@link org.example.dao.interfaces.ProductDao#save(java.sql.Connection, org.example.model.Product)}
+     * and invalidates product caches on success.
+     *
+     * @param product the product to create
+     * @return the persisted {@link Product}
+     * @throws org.example.store.product.exception.ProductCreationException when DAO save fails
+     * @throws org.example.config.exception.DatabaseConnectionException when a DB connection cannot be obtained
+     */
     public Product createProduct(Product product) {
         try (Connection conn = dataSource.getConnection()) {
             conn.setAutoCommit(false);
@@ -43,6 +54,17 @@ public class ProductStore {
         }
     }
 
+    /**
+     * Update an existing {@link org.example.model.Product} inside a transaction.
+     *
+     * Delegates to {@link org.example.dao.interfaces.ProductDao#update(java.sql.Connection, org.example.model.Product)}
+     * and invalidates product caches on success.
+     *
+     * @param product product with updated fields
+     * @return the updated {@link Product}
+     * @throws org.example.store.product.exception.ProductUpdateException when DAO update fails
+     * @throws org.example.config.exception.DatabaseConnectionException when a DB connection cannot be obtained
+     */
     public Product updateProduct(Product product) {
         try (Connection conn = dataSource.getConnection()) {
             conn.setAutoCommit(false);
@@ -60,6 +82,13 @@ public class ProductStore {
         }
     }
 
+    /**
+     * Delete a product by id.
+     *
+     * @param productId product identifier
+     * @throws org.example.store.product.exception.DeleteProductException when DAO delete fails
+     * @throws org.example.config.exception.DatabaseConnectionException when a DB connection cannot be obtained
+     */
     public void deleteProduct(UUID productId) {
         try (Connection conn = dataSource.getConnection()) {
             conn.setAutoCommit(false);
@@ -76,6 +105,17 @@ public class ProductStore {
         }
     }
 
+    /**
+     * Retrieve a product by id.
+     *
+     * Uses {@link org.example.dao.interfaces.ProductDao#findById(java.sql.Connection, java.util.UUID)}
+     * and caches the result via {@link org.example.application.ApplicationCache#getOrLoad}.
+     *
+     * @param productId product identifier
+     * @return an {@link Optional} containing the {@link Product} when found
+     * @throws org.example.store.product.exception.ProductRetrievalException when DAO retrieval fails
+     * @throws org.example.config.exception.DatabaseConnectionException when a DB connection cannot be obtained
+     */
     public Optional<Product> getProduct(UUID productId) {
         try (Connection conn = dataSource.getConnection()) {
             String key = "product:" + productId.toString();
@@ -87,6 +127,19 @@ public class ProductStore {
         }
     }
 
+    /**
+     * Search products using a {@link ProductFilter} with paging.
+     *
+     * Delegates to {@link org.example.dao.interfaces.ProductDao#findFiltered(java.sql.Connection, org.example.model.ProductFilter, int, int)}
+     * and caches results.
+     *
+     * @param filter filter criteria
+     * @param limit maximum number of results
+     * @param offset zero-based offset
+     * @return list of matching {@link Product}
+     * @throws org.example.store.product.exception.ProductSearchException when DAO search fails
+     * @throws org.example.config.exception.DatabaseConnectionException when a DB connection cannot be obtained
+     */
     public List<Product> searchProducts(ProductFilter filter, int limit, int offset) {
         try (Connection conn = dataSource.getConnection()) {
             String key = "product:search:" + filter.hashCode() + limit + offset;
