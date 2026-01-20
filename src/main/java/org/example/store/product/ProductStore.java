@@ -8,6 +8,7 @@ import org.example.dao.interfaces.ProductDao;
 import org.example.model.Product;
 import org.example.model.ProductFilter;
 import org.example.store.product.exception.*;
+import org.example.util.PerformanceTimer;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -90,6 +91,7 @@ public class ProductStore {
     public List<Product> searchProducts(ProductFilter filter, int limit, int offset) {
         try (Connection conn = dataSource.getConnection()) {
             String key = "product:search:" + filter.hashCode() + limit + offset;
+            PerformanceTimer.start("Get All Products - cached");
             return this.cache.getOrLoad(key, () -> this.productDao.findFiltered(conn, filter, limit, offset));
         } catch (DAOException e) {
             throw new ProductSearchException("Failed to search with filter");
