@@ -111,24 +111,6 @@ public class OrderJdbcDao implements OrdersDao {
     }
 
     @Override
-    public List<Orders> findByCustomer(Connection conn, UUID customerId, int limit, int offset) throws DAOException {
-        List<Orders> orders = new ArrayList<>();
-        try (PreparedStatement ps = conn.prepareStatement(FIND_BY_CUSTOMER)) {
-            ps.setObject(1, customerId);
-            ps.setInt(2, limit);
-            ps.setInt(3, offset);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    orders.add(map(rs));
-                }
-            }
-        } catch (SQLException e) {
-            throw new DAOException("Failed to fetch orders for customer " + customerId, e);
-        }
-        return orders;
-    }
-
-    @Override
     public void save(Connection conn, Orders order) throws DAOException {
         try (PreparedStatement ps = conn.prepareStatement(SAVE)) {
             ps.setObject(1, order.getOrderId());

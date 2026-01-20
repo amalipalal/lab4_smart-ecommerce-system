@@ -32,18 +32,6 @@ public interface OrdersDao {
     List<Orders> getAllOrders(Connection connection, int limit, int offset) throws DAOException;
 
     /**
-     * Find orders for a customer with paging.
-     *
-     * @param connection the {@link java.sql.Connection} to use
-     * @param customerId customer identifier
-     * @param limit maximum results
-     * @param offset zero-based offset
-     * @return list of orders for the customer
-     * @throws DAOException on DAO errors
-     */
-    List<Orders> findByCustomer(Connection connection, UUID customerId, int limit, int offset) throws DAOException;
-
-    /**
      * Persist a new {@link Orders}.
      *
      * @param connection the {@link java.sql.Connection} to use
