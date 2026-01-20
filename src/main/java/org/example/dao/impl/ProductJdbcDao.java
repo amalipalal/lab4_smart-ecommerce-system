@@ -26,7 +26,7 @@ public class ProductJdbcDao implements ProductDao {
             """;
 
     private static final String FIND_ALL = """
-            SELECT procuct_id, name, description, price,
+            SELECT product_id, name, description, price,
                    stock_quantity, category_id, created_at, updated_at
             FROM product
             ORDER BY LOWER(name) ASC

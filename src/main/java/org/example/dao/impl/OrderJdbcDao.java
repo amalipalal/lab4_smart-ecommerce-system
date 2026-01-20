@@ -16,12 +16,16 @@ import java.util.UUID;
 
 public class OrderJdbcDao implements OrdersDao {
     private static final String FIND_BY_ID = """
-        SELECT * FROM orders
+        SELECT order_id, customer_id, order_date, total_amount,
+               shipping_country, shipping_city, shipping_postal_code
+        FROM orders
         WHERE order_id = ?
         """;
 
     private static final String ALL_ORDERS = """
-        SELECT * FROM orders
+        SELECT order_id, customer_id, order_date, total_amount,
+               shipping_country, shipping_city, shipping_postal_code
+        FROM orders
         ORDER BY order_date DESC
         LIMIT ? OFFSET ?
         """;
@@ -31,7 +35,9 @@ public class OrderJdbcDao implements OrdersDao {
         """;
 
     private static final String FIND_BY_CUSTOMER = """
-        SELECT * FROM orders
+        SELECT order_id, customer_id, order_date, total_amount,
+               shipping_country, shipping_city, shipping_postal_code
+        FROM orders
         WHERE customer_id = ?
         ORDER BY order_date DESC
         LIMIT ? OFFSET ?

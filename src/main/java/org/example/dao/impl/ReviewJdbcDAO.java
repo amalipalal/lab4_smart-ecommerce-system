@@ -13,7 +13,8 @@ import java.util.UUID;
 public class ReviewJdbcDAO implements ReviewDAO {
 
     private static final String FIND_BY_PRODUCT = """
-        SELECT * FROM review
+        SELECT review_id, product_id, customer_id, rating, comment, created_at
+        FROM review
         WHERE product_id = ?
         ORDER BY created_at DESC
         LIMIT ? OFFSET ?
