@@ -20,6 +20,17 @@ public class ReviewService {
         this.customerStore = customerStore;
     }
 
+    /**
+     * Create a new review for a product.
+     *
+     * This method resolves the customer via {@link CustomerStore#findByEmail(String)} and
+     * persists a newly created {@link Review} via {@link ReviewStore#createReview(Review)}.
+     *
+     * @param request the incoming {@link org.example.dto.review.CreateReviewRequest} containing
+     *                product id, customer email, rating and comment
+     * @return a {@link ReviewResponse} representing the saved review
+     * @throws CustomerNotFoundException if no customer exists with the given email
+     */
     public ReviewResponse createReview(CreateReviewRequest request) {
         var customer = customerStore.findByEmail(request.email())
                 .orElseThrow(() -> new CustomerNotFoundException(request.email()));
@@ -37,6 +48,17 @@ public class ReviewService {
         return new ReviewResponse(review);
     }
 
+    /**
+     * Retrieve reviews for a product page.
+     *
+     * Delegates to {@link ReviewStore#getReviewsByProduct(java.util.UUID, int, int)} and
+     * converts results to {@link ReviewResponse}.
+     *
+     * @param productId the product identifier
+     * @param limit     maximum number of reviews to return
+     * @param offset    zero-based offset for paging
+     * @return list of {@link ReviewResponse} for the requested page
+     */
     public List<ReviewResponse> getProductReviews(UUID productId, int limit, int offset) {
         return this.reviewStore.getReviewsByProduct(productId, limit, offset).stream()
                 .map(ReviewResponse::new)

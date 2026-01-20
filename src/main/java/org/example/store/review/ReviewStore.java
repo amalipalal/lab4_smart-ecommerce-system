@@ -26,6 +26,17 @@ public class ReviewStore {
         this.reviewDao = reviewDao;
     }
 
+    /**
+     * Persist a new {@link org.example.model.Review} inside a database transaction.
+     *
+     * This method delegates persistence to {@link org.example.dao.interfaces.ReviewDAO#save(java.sql.Connection, org.example.model.Review)}
+     * and invalidates review-related cache keys on success.
+     *
+     * @param review the review to persist
+     * @return the persisted {@link Review}
+     * @throws org.example.store.review.exception.ReviewCreationException when persistence via the DAO fails
+     * @throws org.example.config.exception.DatabaseConnectionException when a DB connection cannot be obtained
+     */
     public Review createReview(Review review) {
         try (Connection conn = dataSource.getConnection()) {
             conn.setAutoCommit(false);
@@ -48,6 +59,19 @@ public class ReviewStore {
         this.cache.invalidateByPrefix("review:count:" + productId);
     }
 
+    /**
+     * Load a page of reviews for the given product id.
+     *
+     * Results are loaded via {@link org.example.dao.interfaces.ReviewDAO#findByProduct(java.sql.Connection, java.util.UUID, int, int)}
+     * and cached using {@link org.example.application.ApplicationCache#getOrLoad}.
+     *
+     * @param productId product identifier to fetch reviews for
+     * @param limit maximum number of reviews to return
+     * @param offset zero-based offset for paging
+     * @return list of {@link Review} for the requested page
+     * @throws org.example.store.review.exception.ReviewRetrievalException when DAO retrieval fails
+     * @throws org.example.config.exception.DatabaseConnectionException when a DB connection cannot be obtained
+     */
     public List<Review> getReviewsByProduct(UUID productId, int limit, int offset) {
         try (Connection conn = dataSource.getConnection()) {
             String key = "review:product:" + productId + ":" + limit + ":" + offset;

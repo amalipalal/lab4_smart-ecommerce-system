@@ -34,6 +34,19 @@ public class OrderStore {
         this.ordersDao = ordersDao;
     }
 
+    /**
+     * Place an order within a single transaction.
+     *
+     * This method updates product stock via {@link org.example.dao.interfaces.ProductDao#update(java.sql.Connection, org.example.model.Product)},
+     * ensures the customer exists via {@link org.example.dao.interfaces.CustomerDao#findById(java.sql.Connection, java.util.UUID)}
+     * and creates the order via {@link org.example.dao.interfaces.OrdersDao#save(java.sql.Connection, org.example.model.Orders)}.
+     *
+     * @param order the order to persist
+     * @param product the product with adjusted stock already applied
+     * @param customer the customer placing the order
+     * @throws org.example.store.order.exception.OrderPlacementException when any DAO operation fails
+     * @throws org.example.config.exception.DatabaseConnectionException when a DB connection cannot be obtained
+     */
     public void placeOrder(Orders order, Product product, Customer customer) {
         try(Connection conn = dataSource.getConnection()) {
             conn.setAutoCommit(false);
@@ -65,6 +78,18 @@ public class OrderStore {
         this.cache.invalidateByPrefix("order:count");
     }
 
+    /**
+     * Retrieve a page of orders.
+     *
+     * Delegates to {@link org.example.dao.interfaces.OrdersDao#getAllOrders(java.sql.Connection, int, int)}
+     * and caches the result.
+     *
+     * @param limit maximum number of orders to return
+     * @param offset zero-based offset for paging
+     * @return list of {@link Orders}
+     * @throws org.example.store.order.exception.OrderRetrievalException when DAO retrieval fails
+     * @throws org.example.config.exception.DatabaseConnectionException when a DB connection cannot be obtained
+     */
     public List<Orders> getAllOrders(int limit, int offset) {
         try(Connection conn = dataSource.getConnection()) {
             String key = "order:all:" + limit + ':' + offset;
