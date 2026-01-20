@@ -20,12 +20,16 @@ import java.util.UUID;
 public class ProductJdbcDao implements ProductDao {
 
     private static final String FIND_BY_ID = """
-            SELECT * FROM product WHERE product_id = ?
+            SELECT product_id, name, description, price, stock_quantity,
+                   category_id, created_at, updated_at
+            FROM product WHERE product_id = ?
             """;
 
     private static final String FIND_ALL = """
-            SELECT * FROM product
-            ORDER BY name ASC
+            SELECT procuct_id, name, description, price,
+                   stock_quantity, category_id, created_at, updated_at
+            FROM product
+            ORDER BY LOWER(name) ASC
             LIMIT ? OFFSET ?
             """;
 
@@ -34,12 +38,16 @@ public class ProductJdbcDao implements ProductDao {
             """;
 
     private static final String FILTER = """
-            SELECT * FROM product p
+            SELECT p.product_id, p.name, p.description, p.price,
+                   p.stock_quantity, p.category_id, p.created_at, p.updated_at
+            FROM product p
+            JOIN category c ON c.category_id = p.category_id
             """;
 
     private static final String FILTER_COUNT = """
             SELECT COUNT(*)
             FROM product p
+            JOIN category c ON c.category_id = p.category_id
             """;
 
     private static final String SAVE = """
