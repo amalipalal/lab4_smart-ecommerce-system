@@ -4,7 +4,7 @@ import org.example.dto.category.CreateCategoryRequest;
 import org.example.dto.category.CategoryResponse;
 import org.example.dto.category.UpdateCategoryRequest;
 import org.example.model.Category;
-import org.example.store.CategoryStore;
+import org.example.store.category.CategoryStore;
 import org.example.service.exception.CategoryNotFoundException;
 import org.example.service.exception.DuplicateCategoryException;
 
