@@ -22,7 +22,7 @@ public class DataSource {
      * Obtain a pooled JDBC Connection from the underlying HikariCP pool.
      *
      * The returned Connection is managed by HikariCP; see the HikariCP documentation for
-     * pool tuning and lifecycle details: http://brettwooldridge.github.io/HikariCP/
+     * pool tuning and lifecycle details: https://github.com/brettwooldridge/HikariCP
      *
      * @return a pooled {@link java.sql.Connection}
      * @throws SQLException if acquiring a connection from the pool fails
