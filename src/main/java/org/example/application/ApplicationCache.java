@@ -20,7 +20,4 @@ public class ApplicationCache {
         cache.keySet().removeIf(k -> k.startsWith(prefix));
     }
 
-    public void invalidateAll() {
-        cache.clear();
-    }
 }

@@ -68,20 +68,6 @@
                 </graphic>
             </Button>
 
-            <Button fx:id="customersBtn" text="Customers"
-                    maxWidth="Infinity"
-                    style="
-                        -fx-background-color: transparent;
-                        -fx-text-fill: #d1d5db;
-                        -fx-font-size: 14px;
-                        -fx-alignment: CENTER_LEFT;
-                        -fx-graphic-text-gap: 10;
-                    ">
-                <graphic>
-                    <FontIcon iconLiteral="fas-users" iconSize="16" iconColor="#d1d5db"/>
-                </graphic>
-            </Button>
-
             <Pane VBox.vgrow="ALWAYS"/>
 
             <!-- Buyer View Button -->
