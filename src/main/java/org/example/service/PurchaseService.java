@@ -28,6 +28,19 @@ public class PurchaseService {
         this.customerStore = customerStore;
     }
 
+    /**
+     * Process a purchase request.
+     *
+     * This method:
+     * - Loads the product using {@link ProductStore#getProduct(java.util.UUID)} and validates stock.
+     * - Creates or finds the customer via {@link CustomerStore#findByEmail(String)}.
+     * - Updates product stock and places an order through {@link OrderStore#placeOrder(Orders, org.example.model.Product, org.example.model.Customer)}.
+     *
+     * @param orderRequest    the incoming {@link OrderRequest} with product id, quantity and shipping info
+     * @param customerDetails the purchaser details {@link CustomerDetails}
+     * @throws ProductNotFoundException   if the product cannot be found
+     * @throws InsufficientProductStock   if product stock is lower than requested quantity
+     */
     public void purchaseProduct(OrderRequest orderRequest, CustomerDetails customerDetails) {
         UUID productId = orderRequest.productId();
         Product product = this.productStore.getProduct(productId).orElseThrow(
@@ -84,6 +97,16 @@ public class PurchaseService {
         );
     }
 
+    /**
+     * Retrieve paged purchase history.
+     *
+     * Fetches orders from {@link OrderStore#getAllOrders(int, int)}, batch-loads customers via
+     * {@link CustomerStore#findByMultipleIds(java.util.Set)}, and returns {@link OrderResponse} entries.
+     *
+     * @param limit  maximum number of orders to return
+     * @param offset zero-based offset for paging
+     * @return list of {@link OrderResponse}
+     */
     public List<OrderResponse> getPurchaseHistory(int limit, int offset) {
         List<Orders> orders = this.orderStore.getAllOrders(limit, offset);
         Set<UUID> customerIds = orders.stream()
