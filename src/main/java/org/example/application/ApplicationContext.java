@@ -4,7 +4,6 @@ import org.example.config.DataSource;
 import org.example.config.DatabaseConfig;
 import org.example.dao.impl.*;
 import org.example.dao.interfaces.*;
-import org.example.cache.ApplicationCache;
 import org.example.service.CategoryService;
 import org.example.service.PurchaseService;
 import org.example.service.ProductService;
